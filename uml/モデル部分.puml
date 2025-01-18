@@ -1,0 +1,69 @@
+@startuml model
+hide empty members
+
+enum Status {
+    TODO
+    PROGRESS
+    DONE
+}
+
+enum Priority {
+    "1: Emergency & Important for you"
+    "2: Important for you"
+    "3: Emergency"
+    "4: Not your job"
+}
+
+class RootProject {
+    -filepath : String
+    -projects : List<Project>
+
+    +load() : void
+    -importProjectsFromJson(json:String) : void
+    -importProjectsFromDict(dict:List<Dict>) : void
+    +save() : void
+    -exportProjectsAsJson() : String
+    -exportProjectsAsDict() : List<Dict>
+}
+
+abstract class TreeStructure {
+    -id     : UUID
+    +children : List<TreeStructure>
+
+    +getChildren() : List<TreeStructure>
+    +createChild() : TreeStructure
+    +deleteChild(id:UUID) : void
+    ' I/Oに関する部分
+    +{static}{abstract} restoreFromDict(dict:Dict) : PnTFramework
+    +{static}{abstract} exportAsDict() : Dict
+}
+
+abstract class PnTFramework {
+    +name   : String
+    +due    : Date
+    +status : Status
+    +memo   : String
+}
+
+
+class Project {
+}
+
+class Task {
+    -parent     : Project
+    +assignee   : String
+    +estimation : String
+    +priority   : Priority
+
+
+    +getParent() : Project
+
+}
+
+RootProject "1" *-down- "0...*" Project
+Project "1" *-down- "0...*" Task
+TreeStructure <|-- PnTFramework
+TreeStructure <|- RootProject
+PnTFramework <|- Project
+PnTFramework <|- Task
+@enduml
