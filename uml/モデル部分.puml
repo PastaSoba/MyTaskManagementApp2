@@ -14,31 +14,31 @@ enum Priority {
     "4: Not your job"
 }
 
-class RootProject {
+class ProjectRoot {
     -filepath : String
-    -projects : List<Project>
 
-    +load() : void
-    -importProjectsFromJson(json:String) : void
-    -importProjectsFromDict(dict:List<Dict>) : void
+    +{static}load() : void
+    -{static}import_dict_obj_from_json() : List[ProjectDict]
+    -{static}restore_from_dict(dict:List[ProjectDict]) : ProjectRoot
     +save() : void
-    -exportProjectsAsJson() : String
-    -exportProjectsAsDict() : List<Dict>
+    -export_dict_as_json() : None
+    -export_as_dict() : List<ProjectDict>
 }
 
-abstract class TreeStructure {
+abstract class ABC_Tree {
     -id     : UUID
-    +children : List<TreeStructure>
+    +children : List<ABC_Tree>
 
-    +getChildren() : List<TreeStructure>
-    +createChild() : TreeStructure
+    +id() : UUID
+    +getChildren() : List<ABC_Tree>
+    +createChild() : ABC_Tree
     +deleteChild(id:UUID) : void
     ' I/Oに関する部分
-    +{static}{abstract} restoreFromDict(dict:Dict) : PnTFramework
-    +{static}{abstract} exportAsDict() : Dict
+    +{static}{abstract} restoreFromDict(dict:Union[ProjectDict, TaskDict]) : ABC_Tree
+    +{abstract} exportAsDict() : Union[ProjectDict, TaskDict]
 }
 
-abstract class PnTFramework {
+abstract class ABC_PnT {
     +name   : String
     +due    : Date
     +status : Status
@@ -50,20 +50,15 @@ class Project {
 }
 
 class Task {
-    -parent     : Project
     +assignee   : String
     +estimation : String
     +priority   : Priority
-
-
-    +getParent() : Project
-
 }
 
-RootProject "1" *-down- "0...*" Project
+ProjectRoot "1" *-down- "0...*" Project
 Project "1" *-down- "0...*" Task
-TreeStructure <|-- PnTFramework
-TreeStructure <|- RootProject
-PnTFramework <|- Project
-PnTFramework <|- Task
+ABC_Tree <|-- ABC_PnT
+ABC_Tree <|- ProjectRoot
+ABC_PnT <|- Project
+ABC_PnT <|- Task
 @enduml

@@ -100,7 +100,7 @@ class ABC_PnT(ABC_Tree):
 class ProjectRoot(ABC_Tree):
     """プロジェクトのルートノードを表すクラス
     """
-    FILEPATH = "data/project.json"
+    __FILEPATH = "data/project.json"
 
     def __init__(self):
         super().__init__()
@@ -114,7 +114,7 @@ class ProjectRoot(ABC_Tree):
 
     @staticmethod
     def __import_dict_obj_from_json() -> List[ProjectDict]:
-        with open(ProjectRoot.FILEPATH, "r") as f:
+        with open(ProjectRoot.__FILEPATH, "r") as f:
             return json.load(f)
 
     @staticmethod
@@ -130,7 +130,7 @@ class ProjectRoot(ABC_Tree):
         self.__export_dict_as_json()
 
     def __export_dict_as_json(self) -> None:
-        with open(ProjectRoot.FILEPATH, "w") as f:
+        with open(ProjectRoot.__FILEPATH, "w") as f:
             json.dump(self.__export_as_dict(), f, indent=4)
 
     def __export_as_dict(self) -> List[ProjectDict]:
