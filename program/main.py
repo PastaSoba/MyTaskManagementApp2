@@ -1,11 +1,13 @@
-from model.model import Task, TaskStatus, Priority, Project, ProjectRoot
+from model.model import ProjectRoot
 from view.view import MainWindow
-from pprint import pprint
+from controller.controller import Controller
 
 
 
 def main():
-    view = MainWindow()
+    model = ProjectRoot.load()
+    view  = MainWindow()
+    controller = Controller(model, view)
     view.window.mainloop()
 
 if __name__ == "__main__":
