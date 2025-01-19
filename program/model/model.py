@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Union
 from uuid import UUID, uuid4
-from datetime import date, fromisoformat
+from datetime import date
 import json
 
 from model.status import TaskStatus
@@ -27,7 +27,7 @@ class ABC_Tree(ABC):
         self._id      : UUID             = _id if _id else uuid4()
         self._children: List['ABC_Tree'] = []
     
-    @getattr
+    @property
     def id(self) -> UUID:
         return self._id
 
@@ -175,7 +175,7 @@ class Project(ABC_PnT):
 
     def export_as_dict(self) -> ProjectDict:
         return {
-            "id"    : self.id,
+            "id"    : str(self.id),
             "name"  : self.name,
             "due"   : self.due.isoformat(),
             "status": self.status.value,
@@ -231,7 +231,7 @@ class Task(ABC_PnT):
 
     def export_as_dict(self) -> TaskDict:
         return {
-            "id"        : self.id,
+            "id"        : str(self.id),
             "name"      : self.name,
             "due"       : self.due.isoformat(),
             "status"    : self.status.value,
