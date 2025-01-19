@@ -32,8 +32,10 @@ class TaskListFrame:
         self._add_task_button = ttk.Button(self.frame, text="+ Add Task")
         self._add_task_button.pack(side=tk.BOTTOM, fill="x")
 
-    def add_task_row(self, task: Task):
+    def add_task_row(self, task: Task, _parent=""):
         """タスク一覧を表示するTreeViewにタスクを表す行を追加する
         """
         # treeview中の行も、task.idで識別できるようにしてある
-        self._task_treeview.insert("", "end", iid=task.id, values=(task.name,))
+        self._task_treeview.insert(_parent, "end", iid=task.id, values=(task.name,))
+        for child_task in task.get_children():
+            self.add_task_row(child_task, _parent=task.id)
