@@ -125,7 +125,7 @@ class ProjectRoot(ABC_Tree):
     def restore_from_dict(dict_obj: List[ProjectDict]) -> 'ProjectRoot':
         root = ProjectRoot()
         for project_dict in dict_obj:
-            root.create_child().restore_from_dict(project_dict)
+            root._children.append(Project.restore_from_dict(project_dict))
         return root
 
     def save(self) -> None:
@@ -178,7 +178,7 @@ class Project(ABC_PnT):
         project.status = TaskStatus(dict_obj["status"])
         project.memo   = dict_obj["memo"]
         for task_dict in dict_obj["children"]:
-            project.create_child().restore_from_dict(task_dict)
+            project._children.append(Task.restore_from_dict(task_dict))
         return project
 
     def export_as_dict(self) -> ProjectDict:
@@ -239,7 +239,7 @@ class Task(ABC_PnT):
         task.estimation= dict_obj["estimation"]
         task.priority  = Priority(dict_obj["priority"])
         for child_dict in dict_obj["children"]:
-            task.create_child().restore_from_dict(child_dict)
+            task._children.append(Task.restore_from_dict(child_dict))
         return task
 
     def export_as_dict(self) -> TaskDict:
