@@ -16,7 +16,7 @@ class MainWindow:
         self.window.geometry(Config.INITIAL_WINDOW_SIZE)
 
 
-        self._paned_window       = tk.PanedWindow(self.window, orient=tk.HORIZONTAL)
+        self._paned_window = ttk.PanedWindow(self.window, orient=tk.HORIZONTAL)
         self._project_list_frame = ProjectListFrame(self._paned_window)
         self._task_list_frame    = TaskListFrame(self._paned_window)
         self._detail_frame       = DetailFrame(self._paned_window)
