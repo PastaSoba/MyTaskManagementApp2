@@ -14,5 +14,8 @@ class Controller:
         return cls._instance
 
     def __init__(self, model:ProjectRoot, view:MainWindow):
-        # ...existing code...
-        pass
+        self.model = model
+        self.view  = view
+
+        for project in self.model.get_children():
+            self.view._project_list_frame.add_project_row(project)
