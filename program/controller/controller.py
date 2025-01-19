@@ -19,3 +19,5 @@ class Controller:
 
         for project in self.model.get_children():
             self.view._project_list_frame.add_project_row(project)
+        for task in self.model.get_children()[0].get_children():
+            self.view._task_list_frame.add_task_row(task)
