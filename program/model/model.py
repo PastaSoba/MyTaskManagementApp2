@@ -40,6 +40,7 @@ class ABC_Tree(ABC):
         """
         return self._children
 
+    @abstractmethod
     def create_child(self) -> 'ABC_Tree':
         """
         ノードを作成し、自ノードの子ノードとして追加する。
@@ -47,9 +48,7 @@ class ABC_Tree(ABC):
         Returns:
             ABC_Tree: 追加した子ノード
         """
-        new_child = self.__class__()
-        self._children.append(new_child)
-        return new_child
+        pass
 
     def delete_child(self, id: UUID) -> None:
         """
@@ -100,17 +99,22 @@ class ABC_PnT(ABC_Tree):
 class ProjectRoot(ABC_Tree):
     """プロジェクトのルートノードを表すクラス
     """
-    __FILEPATH = "data/project.json"
+    __FILEPATH = "project.json"
 
     def __init__(self):
         super().__init__()
+
+    def create_child(self) -> 'Project':
+        new_project = Project()
+        self._children.append(new_project)
+        return new_project
 
     @staticmethod
     def load() -> 'ProjectRoot':
         """JSONファイルからプロジェクトのデータを読み込む
         """
         dict_obj = ProjectRoot.__import_dict_obj_from_json()
-        return ProjectRoot.__restore_from_dict(dict_obj)
+        return ProjectRoot.restore_from_dict(dict_obj)
 
     @staticmethod
     def __import_dict_obj_from_json() -> List[ProjectDict]:
@@ -118,7 +122,7 @@ class ProjectRoot(ABC_Tree):
             return json.load(f)
 
     @staticmethod
-    def __restore_from_dict(dict_obj: List[ProjectDict]) -> 'ProjectRoot':
+    def restore_from_dict(dict_obj: List[ProjectDict]) -> 'ProjectRoot':
         root = ProjectRoot()
         for project_dict in dict_obj:
             root.create_child().restore_from_dict(project_dict)
@@ -131,11 +135,10 @@ class ProjectRoot(ABC_Tree):
 
     def __export_dict_as_json(self) -> None:
         with open(ProjectRoot.__FILEPATH, "w") as f:
-            json.dump(self.__export_as_dict(), f, indent=4)
+            json.dump(self.export_as_dict(), f, indent=4)
 
-    def __export_as_dict(self) -> List[ProjectDict]:
+    def export_as_dict(self) -> List[ProjectDict]:
         return [child.export_as_dict() for child in self.get_children()]
-
 
 
 
@@ -161,6 +164,11 @@ class Project(ABC_PnT):
     """
     def __init__(self, _id: UUID = None):
         super().__init__(_id)
+
+    def create_child(self) -> 'Task':
+        new_task = Task()
+        self._children.append(new_task)
+        return new_task
 
     @staticmethod
     def restore_from_dict(dict_obj: ProjectDict) -> 'Project':
@@ -214,6 +222,11 @@ class Task(ABC_PnT):
         self.assignee  :str      = ""
         self.estimation:str      = ""
         self.priority  :Priority = Priority.NOT_YOUR_JOB
+
+    def create_child(self) -> 'Task':
+        new_task = Task()
+        self._children.append(new_task)
+        return new_task
 
     @staticmethod
     def restore_from_dict(dict_obj: TaskDict) -> 'Task':
