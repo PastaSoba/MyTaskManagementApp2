@@ -39,7 +39,7 @@ class Controller:
         """プロジェクト一覧のTreeViewで行が選択された際の処理
 
         1. 選択されたプロジェクトのタスク一覧を取得
-        2. view._task_list_frameにタスク一覧を表示
+        2. view._task_list_frameのタスク一覧表示を更新
         """
         selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
         selected_project = self.model.get_child_by_id(selected_project_id)
