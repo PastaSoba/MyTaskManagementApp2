@@ -31,6 +31,7 @@ abstract class ABC_Tree {
 
     +id() : UUID
     +getChildren() : List<ABC_Tree>
+    +getChildbyID(id:UUID) : ABC_Tree
     +createChild() : ABC_Tree
     +deleteChild(id:UUID) : void
     ' I/Oに関する部分

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from model.model import ProjectRoot
 from view.view import MainWindow
 
@@ -16,7 +18,11 @@ class Controller:
     def __init__(self, model:ProjectRoot, view:MainWindow):
         self.model = model
         self.view  = view
-        self.__construct_initial_view()
+
+        # ビューのイベントハンドラを設定
+        self.view._project_list_frame._project_treeview.bind("<<TreeviewSelect>>", self.__on_project_treeview_select)
+
+        self.__construct_initial_view() # 初期状態のビューを構築
 
     def __construct_initial_view(self):
         """初期状態のビューを構築する
@@ -29,16 +35,10 @@ class Controller:
         if len(projects) > 0:
             self.view._task_list_frame.add_task_rows(projects[0].get_children())
 
-    def set_callback(tk_obj, event_name: str, callback_func):
-        """tkinterオブジェクトにイベントハンドラを設定する
-
-        Parameters
-        ----------
-        tk_obj : tkinter.Widget
-            イベントハンドラを設定する対象のtkオブジェクト
-        event_name : str
-            イベント名（例: <Button-1>）
-        callback_func : Callable
-            イベントハンドラとして設定する関数
+    def __on_project_treeview_select(self, event):
+        """プロジェクト一覧のTreeViewで行が選択された際の処理
         """
-        tk_obj.bind(event_name, callback_func)
+        selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
+        selected_project = self.model.get_child_by_id(selected_project_id)
+        self.view._task_list_frame.delete_all_task_rows()
+        self.view._task_list_frame.add_task_rows(selected_project.get_children())

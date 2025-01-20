@@ -40,6 +40,21 @@ class ABC_Tree(ABC):
         """
         return self._children
 
+    def get_child_by_id(self, id: UUID) -> 'ABC_Tree':
+        """
+        指定したIDを持つ子ノードを返す
+
+        Args:
+            id (UUID): 子ノードのID
+
+        Returns:
+            ABC_Tree: 指定したIDを持つ子ノード
+        """
+        for child in self._children:
+            if child.id == id:
+                return child
+        raise ValueError(f"No child with id {id} found.")
+
     @abstractmethod
     def create_child(self) -> 'ABC_Tree':
         """
