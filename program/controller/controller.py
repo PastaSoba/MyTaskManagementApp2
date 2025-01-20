@@ -16,8 +16,15 @@ class Controller:
     def __init__(self, model:ProjectRoot, view:MainWindow):
         self.model = model
         self.view  = view
+        self.__construct_initial_view()
 
-        for project in self.model.get_children():
-            self.view._project_list_frame.add_project_row(project)
-        for task in self.model.get_children()[0].get_children():
-            self.view._task_list_frame.add_task_row(task)
+    def __construct_initial_view(self):
+        """初期状態のビューを構築する
+        """
+        # プロジェクト一覧とタスク一覧を取得
+        projects = self.model.get_children()
+        # view._project_list_frameにプロジェクト一覧を表示
+        self.view._project_list_frame.add_project_rows(projects)
+        # view._task_list_frameに最初のプロジェクトのタスク一覧を表示
+        if len(projects) > 0:
+            self.view._task_list_frame.add_task_rows(projects[0].get_children())

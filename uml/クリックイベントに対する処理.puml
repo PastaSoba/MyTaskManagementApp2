@@ -1,0 +1,11 @@
+@startuml
+title クリックイベントに対する処理
+
+ProjectListFrame -> Controller : TreeView要素がクリックされた通知
+activate Controller
+
+Controller -> TaskListFrame : 3-A. TreeViewの要素を更新
+Controller -> DetailFrame : 3-B. 表示内容を更新
+
+deactivate Controller
+@enduml

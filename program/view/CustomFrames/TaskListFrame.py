@@ -39,3 +39,9 @@ class TaskListFrame:
         self._task_treeview.insert(_parent, "end", iid=task.id, values=(task.name,))
         for child_task in task.get_children():
             self.add_task_row(child_task, _parent=task.id)
+
+    def add_task_rows(self, tasks: list[Task]):
+        """タスク一覧を表示するTreeViewに複数のタスクを表す行を追加する
+        """
+        for task in tasks:
+            self.add_task_row(task)
