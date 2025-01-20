@@ -2,6 +2,7 @@ from uuid import UUID
 
 from model.model import ProjectRoot
 from view.view import MainWindow
+from tkinter import messagebox
 
 
 
@@ -23,6 +24,7 @@ class Controller:
         self.view._project_list_frame._project_treeview.bind("<ButtonRelease>", self.__on_project_treeview_select)
         self.view._task_list_frame._task_treeview.bind("<ButtonRelease>", self.__on_task_treeview_select)
         self.view._project_list_frame._add_project_button.bind("<ButtonRelease>", self.__on_add_project_button_click)
+        self.view._task_list_frame._add_task_button.bind("<ButtonRelease>", self.__on_add_task_button_click)
 
         self.__construct_initial_view() # 初期状態のビューを構築
 
@@ -53,6 +55,9 @@ class Controller:
         1. 選択されたタスクの詳細をview._detail_frameに表示
         2. view._detail_frameの表示を更新   
         """
+        if len(self.view._task_list_frame._task_treeview.selection()) == 0:
+            # 選択された行がない場合は何もしない
+            return
         selected_task_id = UUID(self.view._task_list_frame._task_treeview.selection()[0])
         selected_task = self.model.get_child_by_id(selected_task_id, recursive=True)
         self.view._detail_frame._name_label["text"] = selected_task.name # testcode
@@ -66,4 +71,20 @@ class Controller:
         new_project = self.model.create_child()
         new_project.name = "New Project"
         self.view._project_list_frame.add_project_row(new_project)
-        self.view._detail_frame._name_label["text"] = new_project.name
+        self.view._detail_frame._name_label["text"] = new_project.name # testcode
+
+    def __on_add_task_button_click(self, event):
+        """タスク追加ボタンがクリックされた際の処理
+
+        1. 選択されているプロジェクトに新しいタスクを追加
+        2. view._task_list_frameに新しいタスクを表示
+        """
+        if len(self.view._project_list_frame._project_treeview.selection()) == 0:
+            messagebox.showwarning("Error", "No parental project is selected")
+        else:
+            selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
+            selected_project = self.model.get_child_by_id(selected_project_id)
+            new_task = selected_project.create_child()
+            new_task.name = "New Task"
+            self.view._task_list_frame.add_task_row(new_task)
+            self.view._detail_frame._name_label["text"] = new_task.name # testcode
