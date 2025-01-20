@@ -52,11 +52,15 @@ class Controller:
     def __on_task_treeview_select(self, event):
         """タスク一覧のTreeViewで行が選択された際の処理
 
-        1. 選択されたタスクの詳細をview._detail_frameに表示
-        2. view._detail_frameの表示を更新   
+        A. タスクが選択された場合
+            1. 選択されたタスクの詳細をview._detail_frameに表示
+            2. view._detail_frameの表示を更新
+
+        B. タスク以外の場所がクリックされた場合
+            1. 選択を解除
         """
-        if len(self.view._task_list_frame._task_treeview.selection()) == 0:
-            # 選択された行がない場合は何もしない
+        if not self.view._task_list_frame._task_treeview.identify_row(event.y):
+            self.view._task_list_frame._task_treeview.selection_remove(*self.view._task_list_frame._task_treeview.selection())
             return
         selected_task_id = UUID(self.view._task_list_frame._task_treeview.selection()[0])
         selected_task = self.model.get_child_by_id(selected_task_id, recursive=True)
