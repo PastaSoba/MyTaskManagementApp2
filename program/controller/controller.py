@@ -88,6 +88,7 @@ class Controller:
             # タスクの親となるべきプロジェクトが選択されていない場合は警告を表示
             messagebox.showwarning("Error", "No parental project is selected")
         else:
+            # TODO: 行の選択がないときはタスクを作成し、行の選択があるときはそのタスクの子タスクを作成するように変更
             selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
             selected_project = self.model.get_child_by_id(selected_project_id)
             new_task = selected_project.create_child()
