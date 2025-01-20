@@ -21,8 +21,13 @@ class TaskListFrame:
     def __create_task_treeview(self):
         """タスク一覧を表示するTreeviewを作成して、frameに配置する
         """
-        self._task_treeview = ttk.Treeview(self.frame, columns=["name"], show="headings")
+        self._task_treeview = ttk.Treeview(
+            self.frame,
+            columns=["name"],
+            show="tree headings",
+        )
         self._task_treeview.heading("name", text="Task Name")
+        self._task_treeview.column("#0", width=20, stretch=False)  # ツリー列の幅を設定
         self._task_treeview.column("name", width=200)
         self._task_treeview.pack(side=tk.TOP, fill="both", expand=True)
 
