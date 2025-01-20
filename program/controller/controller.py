@@ -22,6 +22,7 @@ class Controller:
         # ビューのイベントハンドラを設定
         self.view._project_list_frame._project_treeview.bind("<ButtonRelease>", self.__on_project_treeview_select)
         self.view._task_list_frame._task_treeview.bind("<ButtonRelease>", self.__on_task_treeview_select)
+        self.view._project_list_frame._add_project_button.bind("<ButtonRelease>", self.__on_add_project_button_click)
 
         self.__construct_initial_view() # 初期状態のビューを構築
 
@@ -55,3 +56,14 @@ class Controller:
         selected_task_id = UUID(self.view._task_list_frame._task_treeview.selection()[0])
         selected_task = self.model.get_child_by_id(selected_task_id, recursive=True)
         self.view._detail_frame._name_label["text"] = selected_task.name # testcode
+
+    def __on_add_project_button_click(self, event):
+        """プロジェクト追加ボタンがクリックされた際の処理
+
+        1. モデルに新しいプロジェクトを追加
+        2. view._project_list_frameに新しいプロジェクトを表示
+        """
+        new_project = self.model.create_child()
+        new_project.name = "New Project"
+        self.view._project_list_frame.add_project_row(new_project)
+        self.view._detail_frame._name_label["text"] = new_project.name
