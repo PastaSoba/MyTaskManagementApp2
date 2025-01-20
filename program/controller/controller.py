@@ -60,6 +60,7 @@ class Controller:
             1. 選択を解除
         """
         if not self.view._task_list_frame._task_treeview.identify_row(event.y):
+            # タスク以外の場所がクリックされた場合は選択を解除
             self.view._task_list_frame._task_treeview.selection_remove(*self.view._task_list_frame._task_treeview.selection())
             return
         selected_task_id = UUID(self.view._task_list_frame._task_treeview.selection()[0])
@@ -84,6 +85,7 @@ class Controller:
         2. view._task_list_frameに新しいタスクを表示
         """
         if len(self.view._project_list_frame._project_treeview.selection()) == 0:
+            # タスクの親となるべきプロジェクトが選択されていない場合は警告を表示
             messagebox.showwarning("Error", "No parental project is selected")
         else:
             selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
