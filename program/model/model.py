@@ -40,12 +40,13 @@ class ABC_Tree(ABC):
         """
         return self._children
 
-    def get_child_by_id(self, id: UUID) -> 'ABC_Tree':
+    def get_child_by_id(self, id: UUID, recursive: bool=False) -> 'ABC_Tree':
         """
         指定したIDを持つ子ノードを返す
 
         Args:
             id (UUID): 子ノードのID
+            recursive (bool): 再帰的に探索する場合はTrue
 
         Returns:
             ABC_Tree: 指定したIDを持つ子ノード
@@ -53,6 +54,11 @@ class ABC_Tree(ABC):
         for child in self._children:
             if child.id == id:
                 return child
+            if recursive:
+                try:
+                    return child.get_child_by_id(id, True)
+                except ValueError:
+                    pass
         raise ValueError(f"No child with id {id} found.")
 
     @abstractmethod
