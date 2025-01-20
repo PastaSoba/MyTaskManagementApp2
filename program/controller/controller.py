@@ -28,3 +28,17 @@ class Controller:
         # view._task_list_frameに最初のプロジェクトのタスク一覧を表示
         if len(projects) > 0:
             self.view._task_list_frame.add_task_rows(projects[0].get_children())
+
+    def set_callback(tk_obj, event_name: str, callback_func):
+        """tkinterオブジェクトにイベントハンドラを設定する
+
+        Parameters
+        ----------
+        tk_obj : tkinter.Widget
+            イベントハンドラを設定する対象のtkオブジェクト
+        event_name : str
+            イベント名（例: <Button-1>）
+        callback_func : Callable
+            イベントハンドラとして設定する関数
+        """
+        tk_obj.bind(event_name, callback_func)
