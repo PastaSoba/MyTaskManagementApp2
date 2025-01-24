@@ -25,6 +25,8 @@ class Controller:
         self.view._task_list_frame._task_treeview.bind("<ButtonRelease>", self.__on_task_treeview_select)
         self.view._project_list_frame._add_project_button.bind("<ButtonRelease>", self.__on_add_project_button_click)
         self.view._task_list_frame._add_task_button.bind("<ButtonRelease>", self.__on_add_task_button_click)
+        # ビューの右クリックメニューのイベントハンドラを設定
+        self.view._task_list_frame._right_click_menu.add_command(label="Delete", command=self.__on_delete_task_menu_click)
 
         self.__construct_initial_view() # 初期状態のビューを構築
 
@@ -98,3 +100,11 @@ class Controller:
             self.view._task_list_frame.add_task_row(new_task)
             self.view._detail_frame._name_label["text"] = new_task.name # testcode
             self.model.save()
+
+    def __on_delete_task_menu_click(self):
+        """タスクの右クリックメニューのDeleteがクリックされた際の処理
+
+        1. 選択されているタスクを削除
+        2. view._task_list_frameの表示を更新
+        3. モデルの変更を保存
+        """

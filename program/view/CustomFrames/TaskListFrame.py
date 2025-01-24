@@ -16,6 +16,7 @@ class TaskListFrame:
         self.frame.pack(fill=tk.BOTH, expand=True)
         self.__create_task_treeview()
         self.__create_add_task_button()
+        self.__create_right_click_menu()
 
 
     def __create_task_treeview(self):
@@ -36,6 +37,22 @@ class TaskListFrame:
         """
         self._add_task_button = ttk.Button(self.frame, text="+ Add Task")
         self._add_task_button.pack(side=tk.BOTTOM, fill="x")
+
+    def __create_right_click_menu(self):
+        """
+        右クリックメニューのひな形と、 Treeview上で右クリックすることで
+        メニューを表示するイベントを設定する。
+        
+        NOTE: このメソッドではあくまで「ひな形」しか作らない。
+              メニューの内容とそれに対応するイベントハンドラはControllerで設定される
+        """
+        self._right_click_menu = tk.Menu(self.frame, tearoff=0)
+        def show_right_click_menu(event):
+            selected_row = self._task_treeview.identify_row(event.y)
+            if selected_row:
+                self._task_treeview.selection_set(selected_row)
+                self._right_click_menu.post(event.x_root, event.y_root)
+        self._task_treeview.bind("<Button-3>", show_right_click_menu)
 
     def add_task_row(self, task: Task, _parent=""):
         """タスク一覧を表示するTreeViewにタスクを表す行を追加する
