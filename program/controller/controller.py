@@ -72,17 +72,20 @@ class Controller:
 
         1. モデルに新しいプロジェクトを追加
         2. view._project_list_frameに新しいプロジェクトを表示
+        3. モデルの変更を保存
         """
         new_project = self.model.create_child()
         new_project.name = "New Project"
         self.view._project_list_frame.add_project_row(new_project)
         self.view._detail_frame._name_label["text"] = new_project.name # testcode
+        self.model.save()
 
     def __on_add_task_button_click(self, event):
         """タスク追加ボタンがクリックされた際の処理
 
         1. 選択されているプロジェクトに新しいタスクを追加
         2. view._task_list_frameに新しいタスクを表示
+        3. モデルの変更を保存
         """
         if len(self.view._project_list_frame._project_treeview.selection()) == 0:
             # タスクの親となるべきプロジェクトが選択されていない場合は警告を表示
@@ -94,3 +97,4 @@ class Controller:
             new_task.name = "New Task"
             self.view._task_list_frame.add_task_row(new_task)
             self.view._detail_frame._name_label["text"] = new_task.name # testcode
+            self.model.save()
