@@ -1,7 +1,8 @@
 from uuid import UUID
 
-from model.model import ProjectRoot
+from model.model import ProjectRoot, Project, Task
 from view.view import MainWindow
+from view.CustomFrames.DetailFrame import *
 from tkinter import messagebox
 
 
@@ -54,7 +55,7 @@ class Controller:
         selected_project = self.model.get_child_by_id(selected_project_id)
         self.view._task_list_frame.delete_all_task_rows()
         self.view._task_list_frame.add_task_rows(selected_project.get_children())
-        self.view._detail_frame._name_label["text"] = selected_project.name # testcode
+        self.__refresh_project_detail_frame(selected_project)
 
     def __on_task_treeview_select(self, event):
         """タスク一覧のTreeViewで行が選択された際の処理
@@ -72,7 +73,7 @@ class Controller:
             return
         selected_task_id = UUID(self.view._task_list_frame._task_treeview.selection()[0])
         selected_task = self.model.get_child_by_id(selected_task_id, recursive=True)
-        self.view._detail_frame._name_label["text"] = selected_task.name # testcode
+        self.__refresh_task_detail_frame(selected_task)
 
     def __on_add_project_button_click(self, event):
         """プロジェクト追加ボタンがクリックされた際の処理
@@ -84,7 +85,7 @@ class Controller:
         new_project = self.model.create_child()
         new_project.name = "New Project"
         self.view._project_list_frame.add_project_row(new_project)
-        self.view._detail_frame._name_label["text"] = new_project.name # testcode
+        self.__refresh_project_detail_frame(new_project)
         self.model.save()
 
     def __on_add_task_button_click(self, event):
@@ -103,7 +104,7 @@ class Controller:
             new_task = selected_project.create_child()
             new_task.name = "New Task"
             self.view._task_list_frame.add_task_row(new_task)
-            self.view._detail_frame._name_label["text"] = new_task.name # testcode
+            self.__refresh_task_detail_frame(new_task)
             self.model.save()
 
     def __on_delete_project_menu_click(self):
@@ -143,3 +144,36 @@ class Controller:
         self.view._task_list_frame._task_treeview.delete(selected_task.id)
         # [Model] モデルの変更を保存
         self.model.save()
+
+    def __refresh_project_detail_frame(self, selected_project:Project):
+        """
+        既存のDetailFrameを削除し、
+        選択されたプロジェクトの詳細をview._detail_frameに表示する
+        """
+        # 既存のDetailFrameを削除して、新しいDetailFrameを作成し、paned_windowに追加
+        self.view._detail_frame.destroy()
+        self.view._detail_frame = ProjectDetailFrame(self.view._paned_window)
+        self.view._paned_window.add(self.view._detail_frame.frame)
+        # 選択されたプロジェクトの情報をDetailFrameに表示
+        self.view._detail_frame.name_entry.set(selected_project.name)
+        self.view._detail_frame.due_entry.set(selected_project.due)
+        self.view._detail_frame.status_entry.set(selected_project.status)
+        self.view._detail_frame.memo_entry.set(selected_project.memo)
+
+    def __refresh_task_detail_frame(self, selected_task:Task):
+        """
+        既存のDetailFrameを削除し、
+        選択されたタスクの詳細をview._detail_frameに表示する
+        """
+        # 既存のDetailFrameを削除して、新しいDetailFrameを作成し、paned_windowに追加
+        self.view._detail_frame.destroy()
+        self.view._detail_frame = TaskDetailFrame(self.view._paned_window)
+        self.view._paned_window.add(self.view._detail_frame.frame)
+        # 選択されたタスクの情報をDetailFrameに表示
+        self.view._detail_frame.name_entry.set(selected_task.name)
+        self.view._detail_frame.due_entry.set(selected_task.due)
+        self.view._detail_frame.status_entry.set(selected_task.status)
+        self.view._detail_frame.memo_entry.set(selected_task.memo)
+        self.view._detail_frame.assignee_entry.set(selected_task.assignee)
+        self.view._detail_frame.estimation_entry.set(selected_task.estimation)
+        self.view._detail_frame.priority_entry.set(selected_task.priority)
