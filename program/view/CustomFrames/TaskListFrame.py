@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from uuid import UUID
 from typing import Optional
 from model.model import Task
 
@@ -11,6 +12,7 @@ class TaskListFrame:
         self.frame           : ttk.Frame           = ttk.Frame(parent)
         self._task_treeview  : Optional[ttk.Treeview] = None
         self._add_task_button: Optional[ttk.Button]   = None
+        self._due_sort_ascending: bool = True  # ソート順を追跡
 
 
         self.frame.pack(fill=tk.BOTH, expand=True)
@@ -28,7 +30,7 @@ class TaskListFrame:
             show="tree headings",
         )
         self._task_treeview.heading("name", text="Task Name")
-        self._task_treeview.heading("due", text="Due")
+        self._task_treeview.heading("due", text="Due", command=lambda: self.sort_by_due())
         self._task_treeview.column("#0", width=20, stretch=False)  # ツリー列の幅を設定
         self._task_treeview.column("name", width=200)
         self._task_treeview.column("due", width=100)
@@ -80,3 +82,20 @@ class TaskListFrame:
     def delete_all_task_rows(self):
         """タスク一覧を表示するTreeViewの全アイテムを削除する"""
         self._task_treeview.delete(*self._task_treeview.get_children())
+
+    def sort_by_due(self):
+        """'due'列に基づいてタスクをソートする
+        なお、Viewのみの操作であり、Modelには影響を与えない
+        """
+        # 全アイテムを取得
+        items = list(self._task_treeview.get_children())
+        
+        # ソート順に基づいて並べ替え
+        items.sort(key=lambda item: self._task_treeview.item(item)['values'][1], reverse=not self._due_sort_ascending)
+        
+        # アイテムを再挿入して順序を更新
+        for index, item in enumerate(items):
+            self._task_treeview.move(item, '', index)
+        
+        # ソート順をトグル
+        self._due_sort_ascending = not self._due_sort_ascending
