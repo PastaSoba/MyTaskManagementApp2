@@ -23,7 +23,7 @@ class ProjectListFrame:
         """
         self._project_treeview = ttk.Treeview(self.frame, columns=["name"], show="headings")
         self._project_treeview.heading("name", text="Project Name")
-        self._project_treeview.column("name", width=200)
+        self._project_treeview.column("name", width=150)
         self._project_treeview.pack(side=tk.TOP, fill="both", expand=True)
 
     def __create_add_project_button(self):

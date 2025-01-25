@@ -34,9 +34,9 @@ class TaskListFrame:
         self._task_treeview.heading("due", text="Due", command=self.__sort_by_due)
         self._task_treeview.heading("state", text="State", command=self.__sort_by_state)
         self._task_treeview.column("#0", width=20, stretch=False)  # ツリー列の幅を設定
-        self._task_treeview.column("name", width=100)
-        self._task_treeview.column("due", width=80)
-        self._task_treeview.column("state", width=80)
+        self._task_treeview.column("name", width=120)
+        self._task_treeview.column("due", width=100)
+        self._task_treeview.column("state", width=100)
         self._task_treeview.pack(side=tk.TOP, fill="both", expand=True)
 
     def __create_add_task_button(self):
