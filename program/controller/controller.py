@@ -17,6 +17,24 @@ class Controller:
             cls._instance = super().__new__(cls)
         return cls._instance
 
+    def eventhandler_with_attr(func):
+        """
+        イベント以外の追加引数を受け取るイベントハンドラ用のデコレータ。
+        このデコレータによって装飾されたハンドラは適切にラップされ、
+        イベント引数のみを受け取るイベントハンドラと同様に使用できます。
+
+        ```
+        @eventhandler_with_attr
+        update_project_attribute(self, event, attr_name)
+        # 上記のように、デコレータを使用してイベントハンドラを定義すると、
+        # そのハンドラは以下のように呼び出されます。
+        update_project_attribute(attr_name="name")
+        ```
+        """
+        def wrapper(self, *args, **kwargs):
+            return lambda event: func(self, event, *args, **kwargs)
+        return wrapper
+
     def __init__(self, model:ProjectRoot, view:MainWindow):
         self.model = model
         self.view  = view
@@ -40,6 +58,10 @@ class Controller:
         projects = self.model.get_children()
         # view._project_list_frameにプロジェクト一覧を表示
         self.view._project_list_frame.add_project_rows(projects)
+
+    ##########################################
+    ########## イベントハンドラ ##############
+    ##########################################
 
     def __on_project_treeview_select(self, event):
         """プロジェクト一覧のTreeViewで行が選択された際の処理
@@ -145,6 +167,32 @@ class Controller:
         # [Model] モデルの変更を保存
         self.model.save()
 
+
+
+    @eventhandler_with_attr
+    def __update_project_attribute(self, event, attr_name):
+        """DetailFrameのEntryの値が変更された際の処理
+
+        1. Entryの値を取得
+        2. モデルの値を更新
+        3. view._project_list_frameの表示を更新
+        4. モデルの変更を保存
+        """
+        # [Model] Entryの値を取得
+        selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
+        selected_project = self.model.get_child_by_id(selected_project_id)
+        # [Model] モデルの値を更新
+        setattr(selected_project, attr_name, event.widget.get())
+        # [View] view._project_list_frameの表示を更新
+        self.view._project_list_frame.update_project_row(selected_project)
+        # [Model] モデルの変更を保存
+        self.model.save()
+
+
+    ##########################################
+    ########## イベントハンドラ以外 ##########
+    ##########################################
+
     def __refresh_project_detail_frame(self, selected_project:Project):
         """
         既存のDetailFrameを削除し、
@@ -159,6 +207,9 @@ class Controller:
         self.view._detail_frame.due_entry.set(selected_project.due)
         self.view._detail_frame.status_entry.set(selected_project.status)
         self.view._detail_frame.memo_entry.set(selected_project.memo)
+        # Entryの値が変更された際のイベントハンドラを設定
+        self.view._detail_frame.name_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="name"))
+
 
     def __refresh_task_detail_frame(self, selected_task:Task):
         """

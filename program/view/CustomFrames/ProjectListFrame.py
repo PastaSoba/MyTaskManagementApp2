@@ -54,6 +54,11 @@ class ProjectListFrame:
         # treeview中の行も、project.idで識別できるようにしてある
         self._project_treeview.insert("", "end", iid=project.id, values=(project.name,))
 
+    def update_project_row(self, project: Project):
+        """プロジェクト一覧を表示するTreeViewのプロジェクトを表す行を更新する
+        """
+        self._project_treeview.item(project.id, values=(project.name,))
+
     def add_project_rows(self, projects: list[Project]):
         """プロジェクト一覧を表示するTreeViewに複数のプロジェクトを表す行を追加する
         """
