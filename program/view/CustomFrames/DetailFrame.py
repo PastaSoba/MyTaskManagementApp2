@@ -18,7 +18,7 @@ class ProjectDetailFrame(DetailFrame):
         self.name_entry      = LabeledEntry(self.frame, 'Name')
         self.due_entry       = LabeledEntry(self.frame, 'Due')
         self.status_combobox = LabeledCombobox(self.frame, 'Status', [status.value for status in TaskStatus])
-        self.memo_entry      = LabeledEntry(self.frame, 'Memo')
+        self.memo_entry      = LabeledText(self.frame, 'Memo')
 
 
 class TaskDetailFrame(DetailFrame):
@@ -30,4 +30,4 @@ class TaskDetailFrame(DetailFrame):
         self.estimation_entry  = LabeledEntry(self.frame, 'Estimation')
         self.priority_combobox = LabeledCombobox(self.frame, 'Priority', [priority.value for priority in Priority])
         self.assignee_entry    = LabeledEntry(self.frame, 'Assignee')
-        self.memo_entry        = LabeledEntry(self.frame, 'Memo')
+        self.memo_entry        = LabeledText(self.frame, 'Memo')

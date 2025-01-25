@@ -29,6 +29,32 @@ class LabeledEntry:
         return self.entry.get()
 
 
+class LabeledText:
+    """ラベル(Label)とテキストボックス(Text)を組み合わせたフレーム(Frame)
+    NOTE: LabeledEntryと互換性を持たせるため、変数名をentryにしているが、実際にはTextウィジェット
+    """
+    def __init__(self, parent, label_value: str=""):
+        # ラベルとテキストボックスを持つフレームを作成
+        self.frame : ttk.Frame = ttk.Frame(parent)
+        self.label : ttk.Label = ttk.Label(self.frame, text=label_value)
+        self.entry : tk.Text = tk.Text(self.frame, wrap="word")
+        # ラベルとテキストボックスをフレームに配置
+        self.frame.pack(fill=tk.BOTH)
+        self.label.pack(side=tk.TOP)
+        self.entry.pack(side=tk.TOP, fill="both", expand=True)
+
+    def set(self, value: str):
+        """テキストボックスに値を設定する
+        """
+        self.entry.delete("1.0", tk.END)
+        self.entry.insert("1.0", value)
+
+    def get(self) -> str:
+        """テキストボックスの値を取得する
+        """
+        return self.entry.get("1.0", tk.END)
+
+
 
 class LabeledCombobox:
     """ラベル(Label)とコンボボックス(Combobox)を組み合わせたフレーム(Frame)"""

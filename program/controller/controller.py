@@ -198,7 +198,10 @@ class Controller:
             raise ValueError(f"Invalid attribute name: {attr_name}")
         
         # 入力値の取得
-        input_value = event.widget.get()
+        if isinstance(event.widget, tk.Text):
+            input_value = event.widget.get("1.0", "end").strip()
+        else:
+            input_value = event.widget.get()
 
         # 属性ごとの型変換
         if attr_name == 'due':
@@ -219,7 +222,7 @@ class Controller:
             except ValueError:
                 messagebox.showerror("入力エラー", f"無効なUUID: {input_value}")
                 return
-        elif attr_name == 'memo' or attr_name == 'name':
+        elif attr_name in {'memo', 'name'}:
             converted_value = str(input_value)
         elif attr_name == 'children':
             # children属性は直接更新しない
@@ -266,7 +269,10 @@ class Controller:
             raise ValueError(f"Invalid attribute name: {attr_name}")
         
         # 入力値の取得
-        input_value = event.widget.get()
+        if isinstance(event.widget, tk.Text):
+            input_value = event.widget.get("1.0", "end").strip()
+        else:
+            input_value = event.widget.get()
 
         # 属性ごとの型変換
         if attr_name == 'due':
@@ -293,7 +299,7 @@ class Controller:
             except ValueError:
                 messagebox.showerror("入力エラー", f"無効な優先度: {input_value}")
                 return
-        elif attr_name == 'memo' or attr_name == 'name' or attr_name == 'assignee' or attr_name == 'estimation':
+        elif attr_name in {'memo', 'name', 'assignee', 'estimation'}:
             converted_value = str(input_value)
         else:
             # その他の属性は文字列として扱う
