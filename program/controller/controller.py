@@ -253,12 +253,12 @@ class Controller:
         # 選択されたプロジェクトの情報をDetailFrameに表示
         self.view._detail_frame.name_entry.set(selected_project.name)
         self.view._detail_frame.due_entry.set(selected_project.due)
-        self.view._detail_frame.status_entry.set(selected_project.status)
+        self.view._detail_frame.status_combobox.set(selected_project.status.name)
         self.view._detail_frame.memo_entry.set(selected_project.memo)
         # Entryの値が変更された際のイベントハンドラを設定
         self.view._detail_frame.name_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="name"))
         self.view._detail_frame.due_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="due"))
-        # self.view._detail_frame.status_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="status"))
+        self.view._detail_frame.status_combobox.combobox.bind("<FocusOut>", self.__update_project_attribute(attr_name="status"))
         self.view._detail_frame.memo_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="memo"))
 
     def __refresh_task_detail_frame(self, selected_task:Task):
@@ -273,8 +273,9 @@ class Controller:
         # 選択されたタスクの情報をDetailFrameに表示
         self.view._detail_frame.name_entry.set(selected_task.name)
         self.view._detail_frame.due_entry.set(selected_task.due)
-        self.view._detail_frame.status_entry.set(selected_task.status)
+        self.view._detail_frame.status_combobox.set(selected_task.status.name)
         self.view._detail_frame.memo_entry.set(selected_task.memo)
         self.view._detail_frame.assignee_entry.set(selected_task.assignee)
         self.view._detail_frame.estimation_entry.set(selected_task.estimation)
         self.view._detail_frame.priority_entry.set(selected_task.priority)
+        # TODO:Entryの値が変更された際のイベントハンドラを設定
