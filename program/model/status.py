@@ -13,6 +13,6 @@ class TaskStatus(Enum):
     DONE : str
         完了したタスクを表します。
     """
-    TODO = "TODO"
-    PROGRESS = "PROGRESS"
-    DONE = "DONE"
+    TODO = "Todo"
+    PROGRESS = "In Progress"
+    DONE = "Done"

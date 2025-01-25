@@ -237,6 +237,76 @@ class Controller:
         self.view._project_list_frame.update_project_row(selected_project)
         # [Model] モデルの変更を保存
         self.model.save()
+    
+    @eventhandler_with_attr
+    def __update_task_attribute(
+        self,
+        event,
+        attr_name: Literal['id', 'name', 'due', 'status', 'memo', 'assignee', 'estimation', 'priority'],
+        task_id: UUID
+    ):
+        """DetailFrameのEntryの値が変更された際の処理
+
+        Parameters
+        ----------
+        event : tkinter.Event
+            発生したイベント
+        attr_name : Literal['id', 'name', 'due', 'status', 'memo', 'assignee', 'estimation', 'priority']
+            更新する属性の名前（TaskDict のキー）
+        task_id : UUID
+            更新するタスクのID
+
+        1. Entryの値を取得
+        2. モデルの値を更新
+        3. view._task_list_frameの表示を更新
+        4. モデルの変更を保存
+        """
+        allowed_attrs = {'id', 'name', 'due', 'status', 'memo', 'assignee', 'estimation', 'priority'}
+        if attr_name not in allowed_attrs:
+            raise ValueError(f"Invalid attribute name: {attr_name}")
+        
+        # 入力値の取得
+        input_value = event.widget.get()
+
+        # 属性ごとの型変換
+        if attr_name == 'due':
+            try:
+                converted_value = datetime.strptime(input_value, "%Y-%m-%d").date()
+            except ValueError:
+                messagebox.showerror("入力エラー", "有効な日付形式 (YYYY-MM-DD) を入力してください。")
+                return
+        elif attr_name == 'status':
+            try:
+                converted_value = TaskStatus(input_value)
+            except ValueError:
+                messagebox.showerror("入力エラー", f"無効なステータス: {input_value}")
+                return
+        elif attr_name == 'id':
+            try:
+                converted_value = UUID(input_value)
+            except ValueError:
+                messagebox.showerror("入力エラー", f"無効なUUID: {input_value}")
+                return
+        elif attr_name == 'priority':
+            try:
+                converted_value = Priority(input_value)
+            except ValueError:
+                messagebox.showerror("入力エラー", f"無効な優先度: {input_value}")
+                return
+        elif attr_name == 'memo' or attr_name == 'name' or attr_name == 'assignee' or attr_name == 'estimation':
+            converted_value = str(input_value)
+        else:
+            # その他の属性は文字列として扱う
+            converted_value = input_value
+
+        # [Model] モデルの値を更新
+        selected_task = self.model.get_child_by_id(task_id, recursive=True)
+        setattr(selected_task, attr_name, converted_value)
+        # [View] view._task_list_frameの表示を更新
+        self.view._task_list_frame.update_task_row(selected_task)
+        # [Model] モデルの変更を保存
+        self.model.save()
+
 
 
     ##########################################
@@ -255,7 +325,7 @@ class Controller:
         # 選択されたプロジェクトの情報をDetailFrameに表示
         self.view._detail_frame.name_entry.set(selected_project.name)
         self.view._detail_frame.due_entry.set(selected_project.due)
-        self.view._detail_frame.status_combobox.set(selected_project.status.name)
+        self.view._detail_frame.status_combobox.set(selected_project.status.value)
         self.view._detail_frame.memo_entry.set(selected_project.memo)
         # Entryの値が変更された際のイベントハンドラを設定
         self.view._detail_frame.name_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="name", project_id=selected_project.id))
@@ -275,9 +345,16 @@ class Controller:
         # 選択されたタスクの情報をDetailFrameに表示
         self.view._detail_frame.name_entry.set(selected_task.name)
         self.view._detail_frame.due_entry.set(selected_task.due)
-        self.view._detail_frame.status_combobox.set(selected_task.status.name)
+        self.view._detail_frame.status_combobox.set(selected_task.status.value)
         self.view._detail_frame.memo_entry.set(selected_task.memo)
         self.view._detail_frame.assignee_entry.set(selected_task.assignee)
         self.view._detail_frame.estimation_entry.set(selected_task.estimation)
-        self.view._detail_frame.priority_entry.set(selected_task.priority)
-        # TODO:Entryの値が変更された際のイベントハンドラを設定
+        self.view._detail_frame.priority_combobox.set(selected_task.priority.value)
+        # Entryの値が変更された際のイベントハンドラを設定
+        self.view._detail_frame.name_entry.entry.bind("<FocusOut>", self.__update_task_attribute(attr_name="name", task_id=selected_task.id))
+        self.view._detail_frame.due_entry.entry.bind("<FocusOut>", self.__update_task_attribute(attr_name="due", task_id=selected_task.id))
+        self.view._detail_frame.status_combobox.combobox.bind("<FocusOut>", self.__update_task_attribute(attr_name="status", task_id=selected_task.id))
+        self.view._detail_frame.memo_entry.entry.bind("<FocusOut>", self.__update_task_attribute(attr_name="memo", task_id=selected_task.id))
+        self.view._detail_frame.assignee_entry.entry.bind("<FocusOut>", self.__update_task_attribute(attr_name="assignee", task_id=selected_task.id))
+        self.view._detail_frame.estimation_entry.entry.bind("<FocusOut>", self.__update_task_attribute(attr_name="estimation", task_id=selected_task.id))
+        self.view._detail_frame.priority_combobox.combobox.bind("<FocusOut>", self.__update_task_attribute(attr_name="priority", task_id=selected_task.id))

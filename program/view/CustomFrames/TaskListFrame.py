@@ -68,6 +68,13 @@ class TaskListFrame:
         for task in tasks:
             self.add_task_row(task)
 
+    def update_task_row(self, task: Task):
+        """タスク一覧を表示するTreeViewの行を更新する
+        """
+        self._task_treeview.item(task.id, values=(task.name,))
+        for child_task in task.get_children():
+            self.update_task_row(child_task)
+
     def delete_all_task_rows(self):
         """タスク一覧を表示するTreeViewの全アイテムを削除する"""
         self._task_treeview.delete(*self._task_treeview.get_children())
