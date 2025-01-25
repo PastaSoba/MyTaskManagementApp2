@@ -174,7 +174,8 @@ class Controller:
     def __update_project_attribute(
         self, 
         event, 
-        attr_name: Literal['id', 'name', 'due', 'status', 'memo', 'children']
+        attr_name: Literal['id', 'name', 'due', 'status', 'memo', 'children'],
+        project_id: UUID
     ):
         """DetailFrameのEntryの値が変更された際の処理
 
@@ -184,6 +185,8 @@ class Controller:
             発生したイベント
         attr_name : Literal['id', 'name', 'due', 'status', 'memo', 'children']
             更新する属性の名前（ProjectDict のキー）
+        project_id : UUID
+            更新するプロジェクトのID
 
         1. Entryの値を取得
         2. モデルの値を更新
@@ -227,8 +230,7 @@ class Controller:
             converted_value = input_value
 
         # [Model] モデルの値を更新
-        selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
-        selected_project = self.model.get_child_by_id(selected_project_id)
+        selected_project = self.model.get_child_by_id(project_id)
         setattr(selected_project, attr_name, converted_value)
 
         # [View] view._project_list_frameの表示を更新
@@ -256,10 +258,10 @@ class Controller:
         self.view._detail_frame.status_combobox.set(selected_project.status.name)
         self.view._detail_frame.memo_entry.set(selected_project.memo)
         # Entryの値が変更された際のイベントハンドラを設定
-        self.view._detail_frame.name_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="name"))
-        self.view._detail_frame.due_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="due"))
-        self.view._detail_frame.status_combobox.combobox.bind("<FocusOut>", self.__update_project_attribute(attr_name="status"))
-        self.view._detail_frame.memo_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="memo"))
+        self.view._detail_frame.name_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="name", project_id=selected_project.id))
+        self.view._detail_frame.due_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="due", project_id=selected_project.id))
+        self.view._detail_frame.status_combobox.combobox.bind("<FocusOut>", self.__update_project_attribute(attr_name="status", project_id=selected_project.id))
+        self.view._detail_frame.memo_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="memo", project_id=selected_project.id))
 
     def __refresh_task_detail_frame(self, selected_task:Task):
         """
