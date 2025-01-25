@@ -12,7 +12,8 @@ class TaskListFrame:
         self.frame           : ttk.Frame           = ttk.Frame(parent)
         self._task_treeview  : Optional[ttk.Treeview] = None
         self._add_task_button: Optional[ttk.Button]   = None
-        self._due_sort_ascending: bool = True  # ソート順を追跡
+        self._due_sort_ascending: bool = True  # dueソート順を追跡
+        self._state_sort_ascending: bool = True  # stateソート順を追跡
 
 
         self.frame.pack(fill=tk.BOTH, expand=True)
@@ -26,14 +27,16 @@ class TaskListFrame:
         """
         self._task_treeview = ttk.Treeview(
             self.frame,
-            columns=["name", "due"],  # 'due'列を追加
+            columns=["name", "due", "state"],
             show="tree headings",
         )
         self._task_treeview.heading("name", text="Task Name")
-        self._task_treeview.heading("due", text="Due", command=lambda: self.sort_by_due())
+        self._task_treeview.heading("due", text="Due", command=self.__sort_by_due)
+        self._task_treeview.heading("state", text="State", command=self.__sort_by_state)
         self._task_treeview.column("#0", width=20, stretch=False)  # ツリー列の幅を設定
-        self._task_treeview.column("name", width=200)
-        self._task_treeview.column("due", width=100)
+        self._task_treeview.column("name", width=100)
+        self._task_treeview.column("due", width=80)
+        self._task_treeview.column("state", width=80)
         self._task_treeview.pack(side=tk.TOP, fill="both", expand=True)
 
     def __create_add_task_button(self):
@@ -62,7 +65,7 @@ class TaskListFrame:
         """タスク一覧を表示するTreeViewにタスクを表す行を追加する
         """
         # treeview中の行も、task.idで識別できるようにしてある
-        self._task_treeview.insert(_parent, "end", iid=task.id, values=(task.name, task.due.isoformat()))
+        self._task_treeview.insert(_parent, "end", iid=task.id, values=(task.name, task.due.isoformat(), task.status.value))
         for child_task in task.get_children():
             self.add_task_row(child_task, _parent=task.id)
 
@@ -75,7 +78,7 @@ class TaskListFrame:
     def update_task_row(self, task: Task):
         """タスク一覧を表示するTreeViewの行を更新する
         """
-        self._task_treeview.item(task.id, values=(task.name, task.due.isoformat()))
+        self._task_treeview.item(task.id, values=(task.name, task.due.isoformat(), task.status.value))
         for child_task in task.get_children():
             self.update_task_row(child_task)
 
@@ -83,7 +86,7 @@ class TaskListFrame:
         """タスク一覧を表示するTreeViewの全アイテムを削除する"""
         self._task_treeview.delete(*self._task_treeview.get_children())
 
-    def sort_by_due(self):
+    def __sort_by_due(self):
         """'due'列に基づいてタスクをソートする
         なお、Viewのみの操作であり、Modelには影響を与えない
         """
@@ -91,7 +94,9 @@ class TaskListFrame:
         items = list(self._task_treeview.get_children())
         
         # ソート順に基づいて並べ替え
-        items.sort(key=lambda item: self._task_treeview.item(item)['values'][1], reverse=not self._due_sort_ascending)
+        items.sort(
+            key=lambda item: self._task_treeview.item(item)['values'][1],
+            reverse=not self._due_sort_ascending)
         
         # アイテムを再挿入して順序を更新
         for index, item in enumerate(items):
@@ -99,3 +104,23 @@ class TaskListFrame:
         
         # ソート順をトグル
         self._due_sort_ascending = not self._due_sort_ascending
+
+    def __sort_by_state(self):
+        """'state'列に基づいてタスクをソートする
+        なお、Viewのみの操作であり、Modelには影響を与えない
+        """
+        # 全アイテムを取得
+        items = list(self._task_treeview.get_children())
+        
+        # ソート順に基づいて並べ替え
+        items.sort(
+            key=lambda item: self._task_treeview.item(item)['values'][2],
+            reverse=not self._state_sort_ascending
+        )
+        
+        # アイテムを再挿入して順序を更新
+        for index, item in enumerate(items):
+            self._task_treeview.move(item, '', index)
+        
+        # ソート順をトグル
+        self._state_sort_ascending = not self._state_sort_ascending
