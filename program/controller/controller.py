@@ -26,8 +26,8 @@ class Controller:
         self.view._project_list_frame._add_project_button.bind("<ButtonRelease>", self.__on_add_project_button_click)
         self.view._task_list_frame._add_task_button.bind("<ButtonRelease>", self.__on_add_task_button_click)
         # ビューの右クリックメニューのイベントハンドラを設定
+        self.view._project_list_frame._right_click_menu.add_command(label="Delete", command=self.__on_delete_project_menu_click)
         self.view._task_list_frame._right_click_menu.add_command(label="Delete", command=self.__on_delete_task_menu_click)
-
 
         self.__construct_initial_view() # 初期状態のビューを構築
 
@@ -106,8 +106,23 @@ class Controller:
             self.view._detail_frame._name_label["text"] = new_task.name # testcode
             self.model.save()
 
-    # TODO: プロジェクトの右クリックメニューのイベントハンドラを定義
+    def __on_delete_project_menu_click(self):
+        """プロジェクトの右クリックメニューのDeleteがクリックされた際の処理
 
+        1. 選択されているプロジェクトを削除
+        2. view._project_list_frameの表示を更新
+        3. モデルの変更を保存
+        TODO: 4. view._detail_frameの表示を更新
+        """
+        # [Model] 選択されているプロジェクトを削除
+        selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
+        self.model.delete_child(selected_project_id)
+        # [View] view._project_list_frameから選択されているプロジェクトを削除
+        self.view._project_list_frame._project_treeview.delete(selected_project_id)
+        # [View] プロジェクトに紐づいていたタスクをview._task_list_frameから削除
+        self.view._task_list_frame.delete_all_task_rows()
+        # [Model] モデルの変更を保存
+        self.model.save()
 
     def __on_delete_task_menu_click(self):
         """タスクの右クリックメニューのDeleteがクリックされた際の処理
@@ -115,6 +130,7 @@ class Controller:
         1. 選択されているタスクを削除
         2. view._task_list_frameの表示を更新
         3. モデルの変更を保存
+        TODO: 4. view._detail_frameの表示を更新
         """
         # [Model] 選択されているタスクを削除
         selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
@@ -122,9 +138,7 @@ class Controller:
         selected_project = self.model.get_child_by_id(selected_project_id)
         selected_task = selected_project.get_child_by_id(selected_task_id)
         selected_project.delete_child(selected_task.id)
-
         # [View] view._task_list_frameから選択されているタスクを削除
         self.view._task_list_frame._task_treeview.delete(selected_task.id)
-
         # [Model] モデルの変更を保存
         self.model.save()

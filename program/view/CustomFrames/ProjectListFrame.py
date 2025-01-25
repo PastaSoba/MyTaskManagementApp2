@@ -15,6 +15,7 @@ class ProjectListFrame:
         self.frame.pack(fill=tk.BOTH, expand=True)
         self.__create_project_treeview()
         self.__create_add_project_button()
+        self.__create_right_click_menu()
 
 
     def __create_project_treeview(self):
@@ -30,6 +31,22 @@ class ProjectListFrame:
         """
         self._add_project_button = ttk.Button(self.frame, text="+ Add Project")
         self._add_project_button.pack(side=tk.BOTTOM, fill="x")
+
+    def __create_right_click_menu(self):
+        """
+        右クリックメニューのひな形と、 Treeview上で右クリックすることで
+        メニューを表示するイベントを設定する。
+        
+        NOTE: このメソッドではあくまで「ひな形」しか作らない。
+              メニューの内容とそれに対応するイベントハンドラはControllerで設定される
+        """
+        self._right_click_menu = tk.Menu(self.frame, tearoff=0)
+        def show_right_click_menu(event):
+            selected_row = self._project_treeview.identify_row(event.y)
+            if selected_row:
+                self._project_treeview.selection_set(selected_row)
+                self._right_click_menu.post(event.x_root, event.y_root)
+        self._project_treeview.bind("<Button-3>", show_right_click_menu)
 
     def add_project_row(self, project: Project):
         """プロジェクト一覧を表示するTreeViewにプロジェクトを表す行を追加する
