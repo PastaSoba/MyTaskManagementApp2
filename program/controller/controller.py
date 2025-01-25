@@ -28,7 +28,9 @@ class Controller:
         # ビューの右クリックメニューのイベントハンドラを設定
         self.view._task_list_frame._right_click_menu.add_command(label="Delete", command=self.__on_delete_task_menu_click)
 
+
         self.__construct_initial_view() # 初期状態のビューを構築
+
 
     def __construct_initial_view(self):
         """初期状態のビューを構築する
@@ -45,6 +47,9 @@ class Controller:
         2. view._task_list_frameのタスク一覧表示を更新
         3. view._detail_frameの表示を更新
         """
+        if not self.view._project_list_frame._project_treeview.identify_row(event.y):
+            # プロジェクト以外の場所がクリックされた場合は何もしない
+            return
         selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
         selected_project = self.model.get_child_by_id(selected_project_id)
         self.view._task_list_frame.delete_all_task_rows()
@@ -101,6 +106,9 @@ class Controller:
             self.view._detail_frame._name_label["text"] = new_task.name # testcode
             self.model.save()
 
+    # TODO: プロジェクトの右クリックメニューのイベントハンドラを定義
+
+
     def __on_delete_task_menu_click(self):
         """タスクの右クリックメニューのDeleteがクリックされた際の処理
 
@@ -108,3 +116,15 @@ class Controller:
         2. view._task_list_frameの表示を更新
         3. モデルの変更を保存
         """
+        # [Model] 選択されているタスクを削除
+        selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
+        selected_task_id = UUID(self.view._task_list_frame._task_treeview.selection()[0])
+        selected_project = self.model.get_child_by_id(selected_project_id)
+        selected_task = selected_project.get_child_by_id(selected_task_id)
+        selected_project.delete_child(selected_task.id)
+
+        # [View] view._task_list_frameから選択されているタスクを削除
+        self.view._task_list_frame._task_treeview.delete(selected_task.id)
+
+        # [Model] モデルの変更を保存
+        self.model.save()
