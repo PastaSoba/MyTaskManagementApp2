@@ -15,6 +15,10 @@ class MainWindow:
         self.window.title(Config.WINDOW_TITLE)
         self.window.geometry(Config.INITIAL_WINDOW_SIZE)
 
+        # Treeviewのスタイルを設定
+        style = ttk.Style()
+        style.theme_use(Config.THEME)
+
 
         self._paned_window = ttk.PanedWindow(self.window, orient=tk.HORIZONTAL)
         self._project_list_frame = ProjectListFrame(self._paned_window)
