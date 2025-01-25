@@ -1,9 +1,11 @@
 from uuid import UUID
 from typing import Literal
+from datetime import datetime
+from tkinter import messagebox
 from model.model import ProjectRoot, Project, Task
+from model.status import TaskStatus
 from view.view import MainWindow
 from view.CustomFrames.DetailFrame import *
-from tkinter import messagebox
 
 
 
@@ -168,7 +170,6 @@ class Controller:
         self.model.save()
 
 
-
     @eventhandler_with_attr
     def __update_project_attribute(
         self, 
@@ -192,11 +193,44 @@ class Controller:
         allowed_attrs = {'id', 'name', 'due', 'status', 'memo', 'children'}
         if attr_name not in allowed_attrs:
             raise ValueError(f"Invalid attribute name: {attr_name}")
-        # [Model] Entryの値を取得
+        
+        # 入力値の取得
+        input_value = event.widget.get()
+
+        # 属性ごとの型変換
+        if attr_name == 'due':
+            try:
+                converted_value = datetime.strptime(input_value, "%Y-%m-%d").date()
+            except ValueError:
+                messagebox.showerror("入力エラー", "有効な日付形式 (YYYY-MM-DD) を入力してください。")
+                return
+        elif attr_name == 'status':
+            try:
+                converted_value = TaskStatus(input_value)
+            except ValueError:
+                messagebox.showerror("入力エラー", f"無効なステータス: {input_value}")
+                return
+        elif attr_name == 'id':
+            try:
+                converted_value = UUID(input_value)
+            except ValueError:
+                messagebox.showerror("入力エラー", f"無効なUUID: {input_value}")
+                return
+        elif attr_name == 'memo' or attr_name == 'name':
+            converted_value = str(input_value)
+        elif attr_name == 'children':
+            # children属性は直接更新しない
+            messagebox.showwarning("操作不可", "children属性は直接更新できません。")
+            return
+        else:
+            # その他の属性は文字列として扱う
+            converted_value = input_value
+
+        # [Model] モデルの値を更新
         selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
         selected_project = self.model.get_child_by_id(selected_project_id)
-        # [Model] モデルの値を更新
-        setattr(selected_project, attr_name, event.widget.get())
+        setattr(selected_project, attr_name, converted_value)
+
         # [View] view._project_list_frameの表示を更新
         self.view._project_list_frame.update_project_row(selected_project)
         # [Model] モデルの変更を保存
@@ -223,7 +257,9 @@ class Controller:
         self.view._detail_frame.memo_entry.set(selected_project.memo)
         # Entryの値が変更された際のイベントハンドラを設定
         self.view._detail_frame.name_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="name"))
-
+        self.view._detail_frame.due_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="due"))
+        # self.view._detail_frame.status_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="status"))
+        self.view._detail_frame.memo_entry.entry.bind("<FocusOut>", self.__update_project_attribute(attr_name="memo"))
 
     def __refresh_task_detail_frame(self, selected_task:Task):
         """

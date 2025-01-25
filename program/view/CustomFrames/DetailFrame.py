@@ -1,6 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from view.CustomFrames.LabeledEntry import LabeledEntry
+from view.CustomFrames.LabeledItem import *
 
 
 
