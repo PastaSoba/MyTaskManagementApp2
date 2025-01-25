@@ -1,5 +1,5 @@
 from uuid import UUID
-
+from typing import Literal
 from model.model import ProjectRoot, Project, Task
 from view.view import MainWindow
 from view.CustomFrames.DetailFrame import *
@@ -170,14 +170,28 @@ class Controller:
 
 
     @eventhandler_with_attr
-    def __update_project_attribute(self, event, attr_name):
+    def __update_project_attribute(
+        self, 
+        event, 
+        attr_name: Literal['id', 'name', 'due', 'status', 'memo', 'children']
+    ):
         """DetailFrameのEntryの値が変更された際の処理
+
+        Parameters
+        ----------
+        event : tkinter.Event
+            発生したイベント
+        attr_name : Literal['id', 'name', 'due', 'status', 'memo', 'children']
+            更新する属性の名前（ProjectDict のキー）
 
         1. Entryの値を取得
         2. モデルの値を更新
         3. view._project_list_frameの表示を更新
         4. モデルの変更を保存
         """
+        allowed_attrs = {'id', 'name', 'due', 'status', 'memo', 'children'}
+        if attr_name not in allowed_attrs:
+            raise ValueError(f"Invalid attribute name: {attr_name}")
         # [Model] Entryの値を取得
         selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
         selected_project = self.model.get_child_by_id(selected_project_id)
