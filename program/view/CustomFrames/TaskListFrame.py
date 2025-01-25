@@ -24,12 +24,14 @@ class TaskListFrame:
         """
         self._task_treeview = ttk.Treeview(
             self.frame,
-            columns=["name"],
+            columns=["name", "due"],  # 'due'列を追加
             show="tree headings",
         )
         self._task_treeview.heading("name", text="Task Name")
+        self._task_treeview.heading("due", text="Due")
         self._task_treeview.column("#0", width=20, stretch=False)  # ツリー列の幅を設定
         self._task_treeview.column("name", width=200)
+        self._task_treeview.column("due", width=100)
         self._task_treeview.pack(side=tk.TOP, fill="both", expand=True)
 
     def __create_add_task_button(self):
@@ -58,7 +60,7 @@ class TaskListFrame:
         """タスク一覧を表示するTreeViewにタスクを表す行を追加する
         """
         # treeview中の行も、task.idで識別できるようにしてある
-        self._task_treeview.insert(_parent, "end", iid=task.id, values=(task.name,))
+        self._task_treeview.insert(_parent, "end", iid=task.id, values=(task.name, task.due.isoformat()))
         for child_task in task.get_children():
             self.add_task_row(child_task, _parent=task.id)
 
@@ -71,7 +73,7 @@ class TaskListFrame:
     def update_task_row(self, task: Task):
         """タスク一覧を表示するTreeViewの行を更新する
         """
-        self._task_treeview.item(task.id, values=(task.name,))
+        self._task_treeview.item(task.id, values=(task.name, task.due.isoformat()))
         for child_task in task.get_children():
             self.update_task_row(child_task)
 
