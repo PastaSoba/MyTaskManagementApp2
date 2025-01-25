@@ -118,12 +118,20 @@ class ABC_PnT(ABC_Tree):
 
 
 class ProjectRoot(ABC_Tree):
-    """プロジェクトのルートノードを表すクラス
+    """プロジェクトのルートノードを表すクラス。シングルトンパターンを適用。
     """
     __FILEPATH = "project.json"
+    _instance = None  # シングルトンインスタンスを保持
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(ProjectRoot, cls).__new__(cls)
+        return cls._instance
 
     def __init__(self):
-        super().__init__()
+        if not hasattr(self, '_initialized'):
+            super().__init__()
+            self._initialized = True  # 初期化済みフラグ
 
     def create_child(self) -> 'Project':
         new_project = Project()
@@ -132,10 +140,12 @@ class ProjectRoot(ABC_Tree):
 
     @staticmethod
     def load() -> 'ProjectRoot':
-        """JSONファイルからプロジェクトのデータを読み込む
+        """JSONファイルからプロジェクトのデータを読み込む。シングルトンインスタンスを返す。
         """
-        dict_obj = ProjectRoot.__import_dict_obj_from_json()
-        return ProjectRoot.restore_from_dict(dict_obj)
+        if ProjectRoot._instance is None:
+            dict_obj = ProjectRoot.__import_dict_obj_from_json()
+            ProjectRoot._instance = ProjectRoot.restore_from_dict(dict_obj)
+        return ProjectRoot._instance
 
     @staticmethod
     def __import_dict_obj_from_json() -> List[ProjectDict]:
@@ -275,3 +285,21 @@ class Task(ABC_PnT):
             "priority"  : self.priority.value,
             "children"  : [child.export_as_dict() for child in self.get_children()]
         }
+
+    def parent(self) -> Union[Project, 'Task']:
+        """
+        自分の親ノードを返す。
+        自分がProjectの直下のTaskインスタンスにある場合はProjectを返す。
+        自分がTaskの下のTaskインスタンス（子Task）にある場合は親Taskを返す。
+        Returns:
+            Union[Project, Task]: 親ノード
+        """
+        root = ProjectRoot()
+        for project in root.get_children():
+            # 自分がproject下の直接Taskインスタンスである場合
+            if self in project.get_children():
+                return project
+            # 自分がTaskの下のTaskインスタンス（子Task）である場合
+            for task in project.get_children():
+                if self in task.get_children():
+                    return task

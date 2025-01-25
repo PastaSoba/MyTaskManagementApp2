@@ -49,6 +49,7 @@ class Controller:
         # ビューの右クリックメニューのイベントハンドラを設定
         self.view._project_list_frame._right_click_menu.add_command(label="Delete", command=self.__on_delete_project_menu_click)
         self.view._task_list_frame._right_click_menu.add_command(label="Delete", command=self.__on_delete_task_menu_click)
+        self.view._task_list_frame._right_click_menu.add_command(label="Add Subtask", command=self.__on_add_task_menu_click)
 
         self.__construct_initial_view() # 初期状態のビューを構築
 
@@ -131,6 +132,30 @@ class Controller:
             self.__refresh_task_detail_frame(new_task)
             self.model.save()
 
+    def __on_add_task_menu_click(self):
+        """タスクの右クリックメニューのAdd Subtaskがクリックされた際の処理
+
+        1. 選択されているタスクに新しいタスクを追加
+        2. view._task_list_frameに新しいタスクを表示
+        3. モデルの変更を保存
+        """
+        if len(self.view._task_list_frame._task_treeview.selection()) == 0:
+            # タスクが選択されていない場合は警告を表示
+            messagebox.showwarning("Error", "No task is selected")
+        else:
+            selected_task_id = UUID(self.view._task_list_frame._task_treeview.selection()[0])
+            selected_task = self.model.get_child_by_id(selected_task_id, recursive=True)
+            if isinstance(selected_task.parent(), Task):
+                # 選択されたタスクが子タスクの場合は警告を表示
+                messagebox.showwarning("Error", "Subtask cannot have subtask")
+                return
+            else:
+                new_subtask = selected_task.create_child()
+                new_subtask.name = "New SubTask"
+                self.view._task_list_frame.add_task_row(new_subtask, _parent=selected_task.id)
+                self.__refresh_task_detail_frame(new_subtask)
+                self.model.save()
+
     def __on_delete_project_menu_click(self):
         """プロジェクトの右クリックメニューのDeleteがクリックされた際の処理
 
@@ -156,14 +181,11 @@ class Controller:
         2. view._task_list_frameの表示を更新
         3. モデルの変更を保存
         TODO: 4. view._detail_frameの表示を更新
-        BUG: 子タスクを削除することが出来ない。project→taskの検索しかしていないため。
         """
         # [Model] 選択されているタスクを削除
-        selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
         selected_task_id = UUID(self.view._task_list_frame._task_treeview.selection()[0])
-        selected_project = self.model.get_child_by_id(selected_project_id)
-        selected_task = selected_project.get_child_by_id(selected_task_id)
-        selected_project.delete_child(selected_task.id)
+        selected_task = self.model.get_child_by_id(selected_task_id, recursive=True)
+        selected_task.parent().delete_child(selected_task_id)
         # [View] view._task_list_frameから選択されているタスクを削除
         self.view._task_list_frame._task_treeview.delete(selected_task.id)
         # [Model] モデルの変更を保存
