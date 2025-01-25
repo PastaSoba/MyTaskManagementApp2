@@ -193,7 +193,7 @@ class Controller:
 
 
     @eventhandler_with_attr
-    def __on_update_project_attribute(
+    def __on_project_attribute_update(
         self, 
         event, 
         attr_name: Literal['id', 'name', 'due', 'status', 'memo', 'children'],
@@ -264,7 +264,7 @@ class Controller:
         self.model.save()
     
     @eventhandler_with_attr
-    def __on_update_task_attribute(
+    def __on_task_attribute_update(
         self,
         event,
         attr_name: Literal['id', 'name', 'due', 'status', 'memo', 'assignee', 'estimation', 'priority'],
@@ -356,10 +356,10 @@ class Controller:
         self.view._detail_frame.status_combobox.set(selected_project.status.value)
         self.view._detail_frame.memo_entry.set(selected_project.memo)
         # Entryの値が変更された際のイベントハンドラを設定
-        self.view._detail_frame.name_entry.entry.bind("<FocusOut>", self.__on_update_project_attribute(attr_name="name", project_id=selected_project.id))
-        self.view._detail_frame.due_entry.entry.bind("<FocusOut>", self.__on_update_project_attribute(attr_name="due", project_id=selected_project.id))
-        self.view._detail_frame.status_combobox.combobox.bind("<FocusOut>", self.__on_update_project_attribute(attr_name="status", project_id=selected_project.id))
-        self.view._detail_frame.memo_entry.entry.bind("<FocusOut>", self.__on_update_project_attribute(attr_name="memo", project_id=selected_project.id))
+        self.view._detail_frame.name_entry.entry.bind("<FocusOut>", self.__on_project_attribute_update(attr_name="name", project_id=selected_project.id))
+        self.view._detail_frame.due_entry.entry.bind("<FocusOut>", self.__on_project_attribute_update(attr_name="due", project_id=selected_project.id))
+        self.view._detail_frame.status_combobox.combobox.bind("<FocusOut>", self.__on_project_attribute_update(attr_name="status", project_id=selected_project.id))
+        self.view._detail_frame.memo_entry.entry.bind("<FocusOut>", self.__on_project_attribute_update(attr_name="memo", project_id=selected_project.id))
 
     def __refresh_task_detail_frame(self, selected_task:Task):
         """
@@ -379,10 +379,10 @@ class Controller:
         self.view._detail_frame.estimation_entry.set(selected_task.estimation)
         self.view._detail_frame.priority_combobox.set(selected_task.priority.value)
         # Entryの値が変更された際のイベントハンドラを設定
-        self.view._detail_frame.name_entry.entry.bind("<FocusOut>", self.__on_update_task_attribute(attr_name="name", task_id=selected_task.id))
-        self.view._detail_frame.due_entry.entry.bind("<FocusOut>", self.__on_update_task_attribute(attr_name="due", task_id=selected_task.id))
-        self.view._detail_frame.status_combobox.combobox.bind("<FocusOut>", self.__on_update_task_attribute(attr_name="status", task_id=selected_task.id))
-        self.view._detail_frame.memo_entry.entry.bind("<FocusOut>", self.__on_update_task_attribute(attr_name="memo", task_id=selected_task.id))
-        self.view._detail_frame.assignee_entry.entry.bind("<FocusOut>", self.__on_update_task_attribute(attr_name="assignee", task_id=selected_task.id))
-        self.view._detail_frame.estimation_entry.entry.bind("<FocusOut>", self.__on_update_task_attribute(attr_name="estimation", task_id=selected_task.id))
-        self.view._detail_frame.priority_combobox.combobox.bind("<FocusOut>", self.__on_update_task_attribute(attr_name="priority", task_id=selected_task.id))
+        self.view._detail_frame.name_entry.entry.bind("<FocusOut>", self.__on_task_attribute_update(attr_name="name", task_id=selected_task.id))
+        self.view._detail_frame.due_entry.entry.bind("<FocusOut>", self.__on_task_attribute_update(attr_name="due", task_id=selected_task.id))
+        self.view._detail_frame.status_combobox.combobox.bind("<FocusOut>", self.__on_task_attribute_update(attr_name="status", task_id=selected_task.id))
+        self.view._detail_frame.memo_entry.entry.bind("<FocusOut>", self.__on_task_attribute_update(attr_name="memo", task_id=selected_task.id))
+        self.view._detail_frame.assignee_entry.entry.bind("<FocusOut>", self.__on_task_attribute_update(attr_name="assignee", task_id=selected_task.id))
+        self.view._detail_frame.estimation_entry.entry.bind("<FocusOut>", self.__on_task_attribute_update(attr_name="estimation", task_id=selected_task.id))
+        self.view._detail_frame.priority_combobox.combobox.bind("<FocusOut>", self.__on_task_attribute_update(attr_name="priority", task_id=selected_task.id))
