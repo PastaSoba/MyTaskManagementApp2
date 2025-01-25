@@ -131,6 +131,7 @@ class Controller:
         2. view._task_list_frameの表示を更新
         3. モデルの変更を保存
         TODO: 4. view._detail_frameの表示を更新
+        BUG: 子タスクを削除することが出来ない。project→taskの検索しかしていないため。
         """
         # [Model] 選択されているタスクを削除
         selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
