@@ -1,3 +1,4 @@
 class Config:
     WINDOW_TITLE = "Task Manager"
-    INITIAL_WINDOW_SIZE = "800x600"
+    THEME = "clam"
+    INITIAL_WINDOW_SIZE = "1000x600"
