@@ -1,126 +1,26 @@
-import tkinter as tk
-import tkinter.ttk as ttk
-from uuid import UUID
-from typing import Optional
+import flet as ft
 from model.model import Task
 
-
-
-
 class TaskListFrame:
-    def __init__(self, parent):
-        self.frame           : ttk.Frame           = ttk.Frame(parent)
-        self._task_treeview  : Optional[ttk.Treeview] = None
-        self._add_task_button: Optional[ttk.Button]   = None
-        self._due_sort_ascending: bool = True  # dueソート順を追跡
-        self._state_sort_ascending: bool = True  # stateソート順を追跡
+    def __init__(self):
+        self.view = ft.Column(expand=True)
+        self.task_list = ft.ListView(expand=True, spacing=10)
+        self.add_task_button = ft.FilledButton(text="+ Add Task")
+        self.view.controls.extend([self.task_list, self.add_task_button])
 
+    def get_view(self):
+        return self.view
 
-        self.frame.pack(fill=tk.BOTH, expand=True)
-        self.__create_task_treeview()
-        self.__create_add_task_button()
-        self.__create_right_click_menu()
-
-
-    def __create_task_treeview(self):
-        """タスク一覧を表示するTreeviewを作成して、frameに配置する
-        """
-        self._task_treeview = ttk.Treeview(
-            self.frame,
-            columns=["name", "due", "state"],
-            show="tree headings",
+    def add_task_row(self, task: Task, parent: str = ""):
+        # カード形式でタスク情報を表示
+        task_card = ft.Card(
+            content=ft.Column([
+                ft.Text(task.name, size=18, color="white"),
+                ft.Text(task.due.isoformat(), size=14, color="white"),
+                ft.Text(task.status.value, size=14, color="white")
+            ], tight=True)
         )
-        self._task_treeview.heading("name", text="Task Name")
-        self._task_treeview.heading("due", text="Due", command=self.__sort_by_due)
-        self._task_treeview.heading("state", text="State", command=self.__sort_by_state)
-        self._task_treeview.column("#0", width=20, stretch=False)  # ツリー列の幅を設定
-        self._task_treeview.column("name", width=120)
-        self._task_treeview.column("due", width=100)
-        self._task_treeview.column("state", width=100)
-        self._task_treeview.pack(side=tk.TOP, fill="both", expand=True)
+        self.task_list.controls.append(task_card)
+        self.task_list.update()
 
-    def __create_add_task_button(self):
-        """タスク追加ボタンを作成して、frameに配置する
-        """
-        self._add_task_button = ttk.Button(self.frame, text="+ Add Task")
-        self._add_task_button.pack(side=tk.BOTTOM, fill="x")
-
-    def __create_right_click_menu(self):
-        """
-        右クリックメニューのひな形と、 Treeview上で右クリックすることで
-        メニューを表示するイベントを設定する。
-        
-        NOTE: このメソッドではあくまで「ひな形」しか作らない。
-              メニューの内容とそれに対応するイベントハンドラはControllerで設定される
-        """
-        self._right_click_menu = tk.Menu(self.frame, tearoff=0)
-        def show_right_click_menu(event):
-            selected_row = self._task_treeview.identify_row(event.y)
-            if selected_row:
-                self._task_treeview.selection_set(selected_row)
-                self._right_click_menu.post(event.x_root, event.y_root)
-        self._task_treeview.bind("<Button-3>", show_right_click_menu)
-
-    def add_task_row(self, task: Task, _parent=""):
-        """タスク一覧を表示するTreeViewにタスクを表す行を追加する
-        """
-        # treeview中の行も、task.idで識別できるようにしてある
-        self._task_treeview.insert(_parent, "end", iid=task.id, values=(task.name, task.due.isoformat(), task.status.value))
-        for child_task in task.get_children():
-            self.add_task_row(child_task, _parent=task.id)
-
-    def add_task_rows(self, tasks: list[Task]):
-        """タスク一覧を表示するTreeViewに複数のタスクを表す行を追加する
-        """
-        for task in tasks:
-            self.add_task_row(task)
-
-    def update_task_row(self, task: Task):
-        """タスク一覧を表示するTreeViewの行を更新する
-        """
-        self._task_treeview.item(task.id, values=(task.name, task.due.isoformat(), task.status.value))
-        for child_task in task.get_children():
-            self.update_task_row(child_task)
-
-    def delete_all_task_rows(self):
-        """タスク一覧を表示するTreeViewの全アイテムを削除する"""
-        self._task_treeview.delete(*self._task_treeview.get_children())
-
-    def __sort_by_due(self):
-        """'due'列に基づいてタスクをソートする
-        なお、Viewのみの操作であり、Modelには影響を与えない
-        """
-        # 全アイテムを取得
-        items = list(self._task_treeview.get_children())
-        
-        # ソート順に基づいて並べ替え
-        items.sort(
-            key=lambda item: self._task_treeview.item(item)['values'][1],
-            reverse=not self._due_sort_ascending)
-        
-        # アイテムを再挿入して順序を更新
-        for index, item in enumerate(items):
-            self._task_treeview.move(item, '', index)
-        
-        # ソート順をトグル
-        self._due_sort_ascending = not self._due_sort_ascending
-
-    def __sort_by_state(self):
-        """'state'列に基づいてタスクをソートする
-        なお、Viewのみの操作であり、Modelには影響を与えない
-        """
-        # 全アイテムを取得
-        items = list(self._task_treeview.get_children())
-        
-        # ソート順に基づいて並べ替え
-        items.sort(
-            key=lambda item: self._task_treeview.item(item)['values'][2],
-            reverse=not self._state_sort_ascending
-        )
-        
-        # アイテムを再挿入して順序を更新
-        for index, item in enumerate(items):
-            self._task_treeview.move(item, '', index)
-        
-        # ソート順をトグル
-        self._state_sort_ascending = not self._state_sort_ascending
+    # ... add_task_rows, update_task_row, delete_all_task_rows も同様に...

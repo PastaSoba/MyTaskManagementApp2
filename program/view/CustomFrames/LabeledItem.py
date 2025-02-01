@@ -1,81 +1,44 @@
-import tkinter as tk
-import tkinter.ttk as ttk
-from typing import Optional
-
-
+import flet as ft
 
 class LabeledEntry:
-    """ラベル(Label)とエントリ(Entry)を組み合わせたフレーム(Frame)"""
-    def __init__(self, parent, label_value: str=""):
-        # ラベルとエントリを持つフレームを作成
-        self.frame : ttk.Frame = ttk.Frame(parent)
-        self.label : ttk.Label = ttk.Label(self.frame, text=label_value)
-        self.entry : ttk.Entry = ttk.Entry(self.frame)
-        # ラベルとエントリをフレームに配置
-        self.frame.pack(fill=tk.BOTH)
-        self.label.pack(side=tk.LEFT)
-        self.entry.pack(side=tk.LEFT, fill="x")
-
-
+    def __init__(self, label_value: str = ""):
+        self.container = ft.Column(controls=[
+            ft.Text(label_value),
+            ft.TextField()
+        ])
+    def get_view(self):
+        return self.container
     def set(self, value: str):
-        """エントリに値を設定する
-        """
-        self.entry.delete(0, tk.END)
-        self.entry.insert(0, value)
-
+        self.container.controls[1].value = value
+        self.container.controls[1].update()
     def get(self) -> str:
-        """エントリの値を取得する
-        """
-        return self.entry.get()
-
+        return self.container.controls[1].value
 
 class LabeledText:
-    """ラベル(Label)とテキストボックス(Text)を組み合わせたフレーム(Frame)
-    NOTE: LabeledEntryと互換性を持たせるため、変数名をentryにしているが、実際にはTextウィジェット
-    """
-    def __init__(self, parent, label_value: str=""):
-        # ラベルとテキストボックスを持つフレームを作成
-        self.frame : ttk.Frame = ttk.Frame(parent)
-        self.label : ttk.Label = ttk.Label(self.frame, text=label_value)
-        self.entry : tk.Text = tk.Text(self.frame, wrap="word")
-        # ラベルとテキストボックスをフレームに配置
-        self.frame.pack(fill=tk.BOTH)
-        self.label.pack(side=tk.TOP)
-        self.entry.pack(side=tk.TOP, fill="both", expand=True)
-
+    def __init__(self, label_value: str = ""):
+        self.container = ft.Column(controls=[
+            ft.Text(label_value),
+            ft.TextField(multiline=True, expand=True)
+        ])
+    def get_view(self):
+        return self.container
     def set(self, value: str):
-        """テキストボックスに値を設定する
-        """
-        self.entry.delete("1.0", tk.END)
-        self.entry.insert("1.0", value)
-
+        self.container.controls[1].value = value
+        self.container.controls[1].update()
     def get(self) -> str:
-        """テキストボックスの値を取得する
-        """
-        return self.entry.get("1.0", tk.END)
-
-
+        return self.container.controls[1].value
 
 class LabeledCombobox:
-    """ラベル(Label)とコンボボックス(Combobox)を組み合わせたフレーム(Frame)"""
-    def __init__(self, parent, label_value: str="", values: Optional[list[str]]=None):
-        # ラベルとコンボボックスを持つフレームを作成
-        self.frame : ttk.Frame = ttk.Frame(parent)
-        self.label : ttk.Label = ttk.Label(self.frame, text=label_value)
-        self.combobox : ttk.Combobox = ttk.Combobox(self.frame, values=values, state="readonly")
-        # ラベルとコンボボックスをフレームに配置
-        self.frame.pack(fill=tk.BOTH)
-        self.label.pack(side=tk.LEFT)
-        self.combobox.pack(side=tk.LEFT, fill="x")
-
+    def __init__(self, label_value: str = "", options: list[str] = None):
+        self.container = ft.Column(controls=[
+            ft.Text(label_value),
+            ft.Dropdown(options=[ft.dropdown.Option(opt) for opt in (options or [])])
+        ])
+    def get_view(self):
+        return self.container
     def set(self, value: str):
-        """コンボボックスに値を設定する
-        """
-        if value not in self.combobox['values']:
-            raise ValueError(f"'{value}' is not a valid option")
-        self.combobox.set(value)
-
+        dropdown = self.container.controls[1]
+        dropdown.value = value
+        dropdown.update()
     def get(self) -> str:
-        """コンボボックスの値を取得する
-        """
-        return self.combobox.get()
+        return self.container.controls[1].value

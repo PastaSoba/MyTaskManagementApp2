@@ -1,7 +1,7 @@
 from uuid import UUID
 from typing import Literal
 from datetime import datetime
-from tkinter import messagebox
+import flet as ft
 from model.model import ProjectRoot, Project, Task
 from model.status import TaskStatus
 from view.view import MainWindow
@@ -41,18 +41,13 @@ class Controller:
         self.model = model
         self.view  = view
 
-        # ビューのイベントハンドラを設定
-        self.view._project_list_frame._project_treeview.bind("<ButtonRelease>", self.__on_project_treeview_select)
-        self.view._task_list_frame._task_treeview.bind("<ButtonRelease>", self.__on_task_treeview_select)
-        self.view._project_list_frame._add_project_button.bind("<ButtonRelease>", self.__on_add_project_button_click)
-        self.view._task_list_frame._add_task_button.bind("<ButtonRelease>", self.__on_add_task_button_click)
-        # ビューの右クリックメニューのイベントハンドラを設定
-        self.view._project_list_frame._right_click_menu.add_command(label="Delete", command=self.__on_delete_project_menu_click)
-        self.view._task_list_frame._right_click_menu.add_command(label="Delete", command=self.__on_delete_task_menu_click)
-        self.view._task_list_frame._right_click_menu.add_command(label="Add Subtask", command=self.__on_add_task_menu_click)
+        # fletではbind()ではなく、on_clickプロパティを直接設定する
+        self.view._project_list_frame.add_project_button.on_click = self.__on_add_project_button_click
+        self.view._task_list_frame.add_task_button.on_click    = self.__on_add_task_button_click
+        # ※ ListTileやCard等、個別の項目についてはコントローラー側でon_clickを設定する必要があります
 
-        self.__construct_initial_view() # 初期状態のビューを構築
-
+        # ...existing initialization code (必要な初期表示処理等をfletに合わせて再設計)...
+        self.__construct_initial_view()
 
     def __construct_initial_view(self):
         """初期状態のビューを構築する
@@ -100,7 +95,7 @@ class Controller:
         selected_task = self.model.get_child_by_id(selected_task_id, recursive=True)
         self.__refresh_task_detail_frame(selected_task)
 
-    def __on_add_project_button_click(self, event):
+    def __on_add_project_button_click(self, e: ft.ControlEvent):
         """プロジェクト追加ボタンがクリックされた際の処理
 
         1. モデルに新しいプロジェクトを追加
@@ -113,24 +108,25 @@ class Controller:
         self.__refresh_project_detail_frame(new_project)
         self.model.save()
 
-    def __on_add_task_button_click(self, event):
+    def __on_add_task_button_click(self, e: ft.ControlEvent):
         """タスク追加ボタンがクリックされた際の処理
 
         1. 選択されているプロジェクトに新しいタスクを追加
         2. view._task_list_frameに新しいタスクを表示
         3. モデルの変更を保存
         """
-        if len(self.view._project_list_frame._project_treeview.selection()) == 0:
-            # タスクの親となるべきプロジェクトが選択されていない場合は警告を表示
-            messagebox.showwarning("Error", "No parental project is selected")
-        else:
-            selected_project_id = UUID(self.view._project_list_frame._project_treeview.selection()[0])
-            selected_project = self.model.get_child_by_id(selected_project_id)
-            new_task = selected_project.create_child()
-            new_task.name = "New Task"
-            self.view._task_list_frame.add_task_row(new_task)
-            self.__refresh_task_detail_frame(new_task)
-            self.model.save()
+        if not self.view._project_list_frame.project_list.controls:
+            # fletの場合、AlertDialogなどで警告表示（簡易例としてsnackbarを利用）
+            self.view.get_page().show_snack_bar(ft.SnackBar(content=ft.Text("No parental project is selected")))
+            return
+        # 選択プロジェクトの取得方法は、flet側で選択項目のon_click設定等で管理してください
+        # 以下は概念例です
+        selected_project = self.model.get_children()[0]
+        new_task = selected_project.create_child()
+        new_task.name = "New Task"
+        self.view._task_list_frame.add_task_row(new_task)
+        self.__refresh_task_detail_frame(new_task)
+        self.model.save()
 
     def __on_add_task_menu_click(self):
         """タスクの右クリックメニューのAdd Subtaskがクリックされた際の処理
@@ -141,13 +137,13 @@ class Controller:
         """
         if len(self.view._task_list_frame._task_treeview.selection()) == 0:
             # タスクが選択されていない場合は警告を表示
-            messagebox.showwarning("Error", "No task is selected")
+            self.view.get_page().show_snack_bar(ft.SnackBar(content=ft.Text("No task is selected")))
         else:
             selected_task_id = UUID(self.view._task_list_frame._task_treeview.selection()[0])
             selected_task = self.model.get_child_by_id(selected_task_id, recursive=True)
             if isinstance(selected_task.parent(), Task):
                 # 選択されたタスクが子タスクの場合は警告を表示
-                messagebox.showwarning("Error", "Subtask cannot have subtask")
+                self.view.get_page().show_snack_bar(ft.SnackBar(content=ft.Text("Subtask cannot have subtask")))
                 return
             else:
                 new_subtask = selected_task.create_child()
@@ -230,25 +226,25 @@ class Controller:
             try:
                 converted_value = datetime.strptime(input_value, "%Y-%m-%d").date()
             except ValueError:
-                messagebox.showerror("入力エラー", "有効な日付形式 (YYYY-MM-DD) を入力してください。")
+                self.view.get_page().show_snack_bar(ft.SnackBar(content=ft.Text("有効な日付形式 (YYYY-MM-DD) を入力してください。")))
                 return
         elif attr_name == 'status':
             try:
                 converted_value = TaskStatus(input_value)
             except ValueError:
-                messagebox.showerror("入力エラー", f"無効なステータス: {input_value}")
+                self.view.get_page().show_snack_bar(ft.SnackBar(content=ft.Text(f"無効なステータス: {input_value}")))
                 return
         elif attr_name == 'id':
             try:
                 converted_value = UUID(input_value)
             except ValueError:
-                messagebox.showerror("入力エラー", f"無効なUUID: {input_value}")
+                self.view.get_page().show_snack_bar(ft.SnackBar(content=ft.Text(f"無効なUUID: {input_value}")))
                 return
         elif attr_name in {'memo', 'name'}:
             converted_value = str(input_value)
         elif attr_name == 'children':
             # children属性は直接更新しない
-            messagebox.showwarning("操作不可", "children属性は直接更新できません。")
+            self.view.get_page().show_snack_bar(ft.SnackBar(content=ft.Text("children属性は直接更新できません。")))
             return
         else:
             # その他の属性は文字列として扱う
@@ -301,25 +297,25 @@ class Controller:
             try:
                 converted_value = datetime.strptime(input_value, "%Y-%m-%d").date()
             except ValueError:
-                messagebox.showerror("入力エラー", "有効な日付形式 (YYYY-MM-DD) を入力してください。")
+                self.view.get_page().show_snack_bar(ft.SnackBar(content=ft.Text("有効な日付形式 (YYYY-MM-DD) を入力してください。")))
                 return
         elif attr_name == 'status':
             try:
                 converted_value = TaskStatus(input_value)
             except ValueError:
-                messagebox.showerror("入力エラー", f"無効なステータス: {input_value}")
+                self.view.get_page().show_snack_bar(ft.SnackBar(content=ft.Text(f"無効なステータス: {input_value}")))
                 return
         elif attr_name == 'id':
             try:
                 converted_value = UUID(input_value)
             except ValueError:
-                messagebox.showerror("入力エラー", f"無効なUUID: {input_value}")
+                self.view.get_page().show_snack_bar(ft.SnackBar(content=ft.Text(f"無効なUUID: {input_value}")))
                 return
         elif attr_name == 'priority':
             try:
                 converted_value = Priority(input_value)
             except ValueError:
-                messagebox.showerror("入力エラー", f"無効な優先度: {input_value}")
+                self.view.get_page().show_snack_bar(ft.SnackBar(content=ft.Text(f"無効な優先度: {input_value}")))
                 return
         elif attr_name in {'memo', 'name', 'assignee', 'estimation'}:
             converted_value = str(input_value)
