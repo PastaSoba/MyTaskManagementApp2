@@ -4,23 +4,26 @@ from view.CustomFrames.DetailFrame import ProjectDetailFrame  # または TaskDe
 from view.CustomFrames.TaskListFrame import TaskListFrame
 from view.CustomFrames.ProjectListFrame import ProjectListFrame
 
-def main(page: ft.Page):
-    page.title = Config.WINDOW_TITLE
-    page.window_width = 1000
-    page.window_height = 600
 
-    # fletではPanedWindowの代わりにRowやColumnで画面構成
-    project_list_frame = ProjectListFrame()
-    task_list_frame = TaskListFrame()
-    detail_frame = ProjectDetailFrame()  # 表示する内容に応じて選択
+class MainWindow:
+    def __init__(self):
+        ft.app(target=self.main)
 
-    page.add(
-        ft.Row([
-            project_list_frame.get_view(),
-            task_list_frame.get_view(),
-            detail_frame.get_view()
-        ], expand=True)
-    )
+    def main(self, page: ft.Page):
+        page.title = Config.WINDOW_TITLE
 
-ft.app(target=main)
+
+        # fletではPanedWindowの代わりにRowやColumnで画面構成
+        self.project_list_frame = ProjectListFrame()
+        self.task_list_frame = TaskListFrame()
+        self.detail_frame = ProjectDetailFrame()  # 表示する内容に応じて選択
+
+        page.add(
+            ft.Row([
+                self.project_list_frame.get_view(),
+                self.task_list_frame.get_view(),
+                self.detail_frame.get_view()
+            ] , expand=True)
+        )
+
 

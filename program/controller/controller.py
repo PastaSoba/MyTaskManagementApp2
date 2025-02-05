@@ -42,8 +42,8 @@ class Controller:
         self.view  = view
 
         # fletではbind()ではなく、on_clickプロパティを直接設定する
-        self.view._project_list_frame.add_project_button.on_click = self.__on_add_project_button_click
-        self.view._task_list_frame.add_task_button.on_click    = self.__on_add_task_button_click
+        # self.view._project_list_frame.add_project_button.on_click = self.__on_add_project_button_click
+        # self.view._task_list_frame.add_task_button.on_click    = self.__on_add_task_button_click
         # ※ ListTileやCard等、個別の項目についてはコントローラー側でon_clickを設定する必要があります
 
         # ...existing initialization code (必要な初期表示処理等をfletに合わせて再設計)...
@@ -55,7 +55,7 @@ class Controller:
         # プロジェクト一覧とタスク一覧を取得
         projects = self.model.get_children()
         # view._project_list_frameにプロジェクト一覧を表示
-        self.view._project_list_frame.add_project_rows(projects)
+        self.view.project_list_frame.add_project_rows(projects)
 
     ##########################################
     ########## イベントハンドラ ##############
